@@ -342,12 +342,8 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
       </DialogTrigger>
       <DialogContent className="w-[min(92vw,40rem)]">
         <DialogHeader>
-          <DialogTitle className="font-mono text-2xl font-semibold tracking-tight">
-            {t('aiAgent')}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6 text-muted-foreground">
-            {t('aiDescription')}
-          </DialogDescription>
+          <DialogTitle>{t('aiAgent')}</DialogTitle>
+          <DialogDescription>{t('aiDescription')}</DialogDescription>
         </DialogHeader>
 
         {error ? (
@@ -432,7 +428,7 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
         )}
 
         <div>
-          <Label htmlFor="ai-prompt" className="block font-medium">
+          <Label htmlFor="ai-prompt" className="block">
             {t('whatToBuild')}
           </Label>
           <Textarea
@@ -448,7 +444,7 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
             placeholder={t('aiPlaceholder')}
             rows={3}
             maxLength={2000}
-            className="mt-2 resize-none font-mono"
+            className="mt-2 resize-none"
             disabled={status === 'streaming'}
           />
           <div className="mt-1 flex items-center justify-between">
@@ -467,33 +463,22 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
         <div className="flex items-center gap-2">
           {status === 'error' ? (
             <>
-              <Button type="button" className="font-mono" onClick={handleRetry}>
+              <Button type="button" onClick={handleRetry}>
                 <RefreshCw className="mr-1 size-3" />
                 {t('retry')}
               </Button>
-              <Button
-                type="button"
-                className="font-mono"
-                variant="outline"
-                onClick={resetState}
-              >
+              <Button type="button" variant="outline" onClick={resetState}>
                 {t('clear')}
               </Button>
             </>
           ) : status === 'streaming' ? (
-            <Button
-              type="button"
-              className="font-mono"
-              variant="outline"
-              onClick={handleCancel}
-            >
+            <Button type="button" variant="outline" onClick={handleCancel}>
               <Square className="mr-1 size-3" />
               {t('stop')}
             </Button>
           ) : (
             <Button
               type="button"
-              className="font-mono"
               onClick={handleSubmit}
               disabled={!prompt.trim()}
             >

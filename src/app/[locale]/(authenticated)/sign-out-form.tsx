@@ -33,13 +33,7 @@ export function SignOutForm() {
 
   return (
     <form action={handleSignOut}>
-      <Button
-        type="submit"
-        variant="ghost"
-        size="sm"
-        className="font-mono"
-        loading={isPending}
-      >
+      <Button type="submit" variant="ghost" size="sm" loading={isPending}>
         {t('signOut')}
       </Button>
     </form>

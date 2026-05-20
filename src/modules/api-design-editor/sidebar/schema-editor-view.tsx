@@ -257,17 +257,10 @@ export function SchemaEditorView({
             ) : (
               <div className="rounded border border-border/50 p-2">
                 {formWarning && (
-                  <Alert
-                    variant="default"
-                    className="mb-2 py-1.5 pr-2 pl-2 text-[0.6rem]"
-                  >
+                  <Alert variant="default" className="mb-2 py-1.5 pr-2 pl-2">
                     <AlertTriangle className="size-3 shrink-0" />
-                    <AlertTitle className="text-[0.6rem]">
-                      {t('note')}
-                    </AlertTitle>
-                    <AlertDescription className="text-[0.6rem]">
-                      {formWarning}
-                    </AlertDescription>
+                    <AlertTitle>{t('note')}</AlertTitle>
+                    <AlertDescription>{formWarning}</AlertDescription>
                   </Alert>
                 )}
                 <SchemaJsonForm

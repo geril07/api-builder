@@ -82,10 +82,7 @@ export function SignInForm({
   }
 
   return (
-    <Card
-      aria-busy={isPending}
-      className="w-full max-w-md bg-card/85 p-5 backdrop-blur"
-    >
+    <Card aria-busy={isPending} className="w-full max-w-md p-5">
       <div>
         <h1 className="font-mono text-2xl font-semibold tracking-tight">
           {t('signInTitle')}
@@ -101,7 +98,7 @@ export function SignInForm({
             <Button
               type="button"
               variant="outline"
-              className="w-full gap-2 font-mono"
+              className="w-full gap-2"
               loading={isPending}
               aria-label={t('signInWithGithub')}
               onClick={() => signInWithProvider('github')}
@@ -114,7 +111,7 @@ export function SignInForm({
             <Button
               type="button"
               variant="outline"
-              className="w-full gap-2 font-mono"
+              className="w-full gap-2"
               loading={isPending}
               aria-label={t('signInWithGoogle')}
               onClick={() => signInWithProvider('google')}
@@ -146,13 +143,13 @@ export function SignInForm({
               value={email}
               required
               placeholder={t('emailPlaceholder')}
-              className="h-10 bg-background px-3 font-mono text-sm"
+              className="px-3"
               onChange={(event) => setEmail(event.target.value)}
             />
           </Label>
           <Button
             type="submit"
-            className="w-full gap-2 font-mono"
+            className="w-full gap-2"
             loading={isPending}
             aria-label={t('sendMagicLinkAria')}
           >

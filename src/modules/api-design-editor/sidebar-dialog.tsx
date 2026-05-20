@@ -86,7 +86,7 @@ function SidebarDialogContent({
   })
 
   return (
-    <Card className="absolute top-14 right-4 bottom-7 z-20 flex w-80 animate-in flex-col gap-2 py-2 shadow-2xl shadow-black/30 slide-in-from-right">
+    <Card className="absolute top-14 right-4 bottom-7 z-20 flex w-80 animate-in flex-col gap-2 py-2 slide-in-from-right">
       <EditorPanelHeader
         title={state.title}
         showBackToResource={!!state.selectedEndpoint}

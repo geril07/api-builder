@@ -83,12 +83,7 @@ export function ApiDesignActions({ apiDesign }: ApiDesignActionsProps) {
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogTrigger
           render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="gap-1 font-mono text-muted-foreground"
-            >
+            <Button type="button" variant="ghost" size="sm" className="gap-1">
               <Pencil className="size-3.5" />
               {t('rename')}
             </Button>
@@ -101,10 +96,7 @@ export function ApiDesignActions({ apiDesign }: ApiDesignActionsProps) {
           </DialogHeader>
 
           <form onSubmit={handleRenameSubmit}>
-            <Label
-              className="block font-mono font-medium"
-              htmlFor={`name-${apiDesign.id}`}
-            >
+            <Label className="block" htmlFor={`name-${apiDesign.id}`}>
               {t('name')}
             </Label>
             <Input
@@ -124,11 +116,7 @@ export function ApiDesignActions({ apiDesign }: ApiDesignActionsProps) {
             ) : null}
 
             <DialogFooter showCloseButton>
-              <Button
-                type="submit"
-                className="font-mono"
-                loading={renameMutation.isPending}
-              >
+              <Button type="submit" loading={renameMutation.isPending}>
                 {t('renameConfirm')}
               </Button>
             </DialogFooter>
@@ -138,9 +126,9 @@ export function ApiDesignActions({ apiDesign }: ApiDesignActionsProps) {
 
       <Button
         type="button"
-        variant="ghost"
+        variant="ghost-destructive"
         size="sm"
-        className="gap-1 font-mono text-destructive hover:text-destructive"
+        className="gap-1"
         onClick={() => setIsDeleteOpen(true)}
       >
         <Trash2 className="size-3.5" />

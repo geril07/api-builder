@@ -26,7 +26,6 @@ import { useToast } from '@/shared/ui/toast'
 import { getErrorMessage } from '@/shared/utils/error'
 import { VALID_METHODS } from '@/modules/api-design/endpoints'
 import { ArrowUpRight, Plus, X } from 'lucide-react'
-import { cn } from '@/shared/utils/cn'
 import { EMPTY_ARR } from '@/shared/utils/arrays'
 import type {
   ApiDesignEndpointDto,
@@ -442,14 +441,14 @@ export function EndpointView({
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveQueryParam(i)}
-                        className="size-6 shrink-0"
+                        className="shrink-0"
                         aria-label={t('removeParameter')}
                       >
                         <X className="size-3" />
                       </Button>
                     </div>
                     <div className="flex items-center gap-3 px-0.5">
-                      <Label className="flex items-center gap-1 text-[0.6rem]">
+                      <Label className="flex items-center gap-1">
                         <input
                           type="checkbox"
                           checked={!!param.required}
@@ -462,7 +461,7 @@ export function EndpointView({
                         />
                         {t('required')}
                       </Label>
-                      <Label className="flex items-center gap-1 text-[0.6rem]">
+                      <Label className="flex items-center gap-1">
                         <input
                           type="checkbox"
                           checked={!!param.allowMultiple}
@@ -485,7 +484,6 @@ export function EndpointView({
                         })
                       }
                       placeholder={t('descriptionOptional')}
-                      className="text-[0.65rem]"
                     />
                   </div>
                 ))}
@@ -515,7 +513,6 @@ export function EndpointView({
                     }
                     size="xs"
                     onClick={() => handleRequestBodyModeChange('inline')}
-                    className="rounded-r-none"
                   >
                     {t('inline')}
                   </Button>
@@ -526,7 +523,6 @@ export function EndpointView({
                     }
                     size="xs"
                     onClick={() => handleRequestBodyModeChange('reference')}
-                    className="rounded-l-none border-l-0"
                   >
                     {t('reference')}
                   </Button>
@@ -586,9 +582,6 @@ export function EndpointView({
                   readOnly={isRequestBodyReadOnly}
                   rows={5}
                   placeholder={t('requestBodyJsonPlaceholder')}
-                  className={cn(
-                    isRequestBodyReadOnly && 'cursor-default opacity-80',
-                  )}
                 />
               ) : null}
             </div>
@@ -676,9 +669,6 @@ export function EndpointView({
                 readOnly={isResponseShapeReadOnly}
                 rows={5}
                 placeholder={t('responseShapeJsonPlaceholder')}
-                className={cn(
-                  isResponseShapeReadOnly && 'cursor-default opacity-80',
-                )}
               />
             ) : null}
           </div>

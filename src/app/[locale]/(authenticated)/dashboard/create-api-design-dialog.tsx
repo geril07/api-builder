@@ -79,7 +79,7 @@ export function CreateApiDesignDialog() {
         </DialogHeader>
 
         <form ref={formRef} onSubmit={handleSubmit}>
-          <Label className="block font-mono font-medium" htmlFor="name">
+          <Label className="block" htmlFor="name">
             {t('name')}
           </Label>
           <Input
@@ -98,7 +98,7 @@ export function CreateApiDesignDialog() {
           ) : null}
 
           <DialogFooter showCloseButton>
-            <Button type="submit" className="font-mono" loading={isPending}>
+            <Button type="submit" loading={isPending}>
               {t('createDesign')}
             </Button>
           </DialogFooter>

@@ -91,7 +91,7 @@ function ModeButton({
       type="button"
       variant={active ? 'secondary' : 'ghost'}
       size="sm"
-      className={cn('h-7', active && 'pointer-events-none')}
+      className={cn(active && 'pointer-events-none')}
       aria-pressed={active}
       onClick={onClick}
     >

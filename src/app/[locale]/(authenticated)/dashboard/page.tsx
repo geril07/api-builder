@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       {designs.length > 0 ? (
         <ApiDesignList designs={designs} />
       ) : (
-        <Card className="mt-6 flex flex-1 items-center justify-center border-dashed bg-card/60 p-10 text-center">
+        <Card className="mt-6 flex flex-1 items-center justify-center p-10 text-center">
           <div>
             <p className="font-mono text-sm font-semibold">
               {t('noApiDesigns')}

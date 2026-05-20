@@ -19,7 +19,7 @@ export default function DashboardError({ reset }: { reset: () => void }) {
         <p className="mt-4 text-sm leading-6 text-muted-foreground">
           {t('designsNotLoadedDesc')}
         </p>
-        <Button className="mt-6 font-mono" onClick={reset}>
+        <Button className="mt-6" onClick={reset}>
           {t('tryAgain')}
         </Button>
       </Card>

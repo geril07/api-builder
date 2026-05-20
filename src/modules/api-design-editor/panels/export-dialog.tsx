@@ -100,7 +100,7 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
         if (!open) resetState()
       }}
     >
-      <DialogTrigger render={<Button className="gap-2 font-mono" />}>
+      <DialogTrigger render={<Button className="gap-2" />}>
         {t('exportDesign')}
       </DialogTrigger>
       <DialogContent className="w-[min(92vw,44rem)]">
@@ -119,24 +119,16 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
             <Button
               type="button"
               onClick={() => setFormat('yaml')}
-              className={cn(
-                'h-auto rounded-none px-3 py-1.5 font-mono text-xs',
-                format === 'yaml'
-                  ? 'bg-foreground text-background hover:bg-foreground/90'
-                  : 'bg-card text-foreground hover:bg-muted',
-              )}
+              variant={format === 'yaml' ? 'default' : 'outline'}
+              className={cn('px-3 py-1.5')}
             >
               {t('yaml')}
             </Button>
             <Button
               type="button"
               onClick={() => setFormat('json')}
-              className={cn(
-                'h-auto rounded-none border-l border-border px-3 py-1.5 font-mono text-xs',
-                format === 'json'
-                  ? 'bg-foreground text-background hover:bg-foreground/90'
-                  : 'bg-card text-foreground hover:bg-muted',
-              )}
+              variant={format === 'json' ? 'default' : 'outline'}
+              className={cn('border-l-0 px-3 py-1.5')}
             >
               {t('json')}
             </Button>
@@ -146,7 +138,6 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            className="font-mono"
             onClick={handleGenerate}
             loading={exportApiDesign.isPending}
           >
@@ -164,7 +155,7 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
                 type="button"
                 size="sm"
                 variant="outline"
-                className="gap-1.5 font-mono"
+                className="gap-1.5"
                 onClick={handleCopy}
               >
                 <Copy className="size-3.5" />
@@ -174,7 +165,7 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
                 type="button"
                 size="sm"
                 variant="outline"
-                className="gap-1.5 font-mono"
+                className="gap-1.5"
                 onClick={handleDownload}
               >
                 <Download className="size-3.5" />

@@ -393,13 +393,13 @@ function PropertyRow({
           onChange={handleNameChange}
           onBlur={onBlur}
           placeholder="name"
-          className="h-6 min-w-0 flex-1 px-1.5 py-0 text-[0.65rem]"
+          className="min-w-0 flex-1 px-1.5 py-0"
         />
         <Select value={propType} onValueChange={handleTypeChange}>
           <SelectTrigger
             size="sm"
             aria-label="Property type"
-            className="h-6 w-14 px-1 text-[0.6rem]"
+            className="w-14 px-1"
           >
             <SelectValue />
           </SelectTrigger>
@@ -549,7 +549,7 @@ function ArrayItemsEditor({
 
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <Label className="text-[0.6rem]">{t('minItems')}</Label>
+          <Label>{t('minItems')}</Label>
           <Input
             size="sm"
             type="number"
@@ -564,11 +564,10 @@ function ArrayItemsEditor({
               )
             }
             onBlur={onBlur}
-            className="h-6 text-[0.65rem]"
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-[0.6rem]">{t('maxItems')}</Label>
+          <Label>{t('maxItems')}</Label>
           <Input
             size="sm"
             type="number"
@@ -583,7 +582,6 @@ function ArrayItemsEditor({
               )
             }
             onBlur={onBlur}
-            className="h-6 text-[0.65rem]"
           />
         </div>
       </div>
@@ -652,7 +650,6 @@ function StringConstraintsEditor({
           }}
           onBlur={onBlur}
           placeholder={t('enumPlaceholder')}
-          className="h-6 text-[0.65rem]"
         />
       </div>
 
@@ -673,7 +670,7 @@ function StringConstraintsEditor({
         <div className="space-y-2 pl-1">
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label className="text-[0.6rem]">{t('minLength')}</Label>
+              <Label>{t('minLength')}</Label>
               <Input
                 size="sm"
                 type="number"
@@ -688,11 +685,10 @@ function StringConstraintsEditor({
                   )
                 }
                 onBlur={onBlur}
-                className="h-6 text-[0.65rem]"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[0.6rem]">{t('maxLength')}</Label>
+              <Label>{t('maxLength')}</Label>
               <Input
                 size="sm"
                 type="number"
@@ -707,12 +703,11 @@ function StringConstraintsEditor({
                   )
                 }
                 onBlur={onBlur}
-                className="h-6 text-[0.65rem]"
               />
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="text-[0.6rem]">{t('pattern')}</Label>
+            <Label>{t('pattern')}</Label>
             <Input
               size="sm"
               value={getString(schema, 'pattern')}
@@ -727,7 +722,6 @@ function StringConstraintsEditor({
               }
               onBlur={onBlur}
               placeholder={t('patternPlaceholder')}
-              className="h-6 font-mono text-[0.65rem]"
             />
           </div>
         </div>
@@ -751,7 +745,7 @@ function NumberConstraintsEditor({
     <div className="space-y-2">
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <Label className="text-[0.6rem]">{t('minimum')}</Label>
+          <Label>{t('minimum')}</Label>
           <Input
             size="sm"
             type="number"
@@ -766,11 +760,10 @@ function NumberConstraintsEditor({
               )
             }
             onBlur={onBlur}
-            className="h-6 text-[0.65rem]"
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-[0.6rem]">{t('maximum')}</Label>
+          <Label>{t('maximum')}</Label>
           <Input
             size="sm"
             type="number"
@@ -785,12 +778,11 @@ function NumberConstraintsEditor({
               )
             }
             onBlur={onBlur}
-            className="h-6 text-[0.65rem]"
           />
         </div>
       </div>
       <div className="space-y-1">
-        <Label className="text-[0.6rem]">{t('multipleOf')}</Label>
+        <Label>{t('multipleOf')}</Label>
         <Input
           size="sm"
           type="number"
@@ -805,7 +797,6 @@ function NumberConstraintsEditor({
             )
           }
           onBlur={onBlur}
-          className="h-6 text-[0.65rem]"
         />
       </div>
     </div>

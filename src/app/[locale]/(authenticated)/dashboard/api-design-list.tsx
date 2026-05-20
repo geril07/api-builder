@@ -51,10 +51,7 @@ export function ApiDesignList({ designs }: ApiDesignListProps) {
       {filtered.length > 0 ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((design) => (
-            <Card
-              key={design.id}
-              className="relative flex flex-col p-4 focus-within:ring-1 focus-within:ring-ring/50"
-            >
+            <Card key={design.id} className="relative flex flex-col p-4">
               <Link
                 href={`/api-designs/${design.id}`}
                 className="absolute inset-0 z-0"
@@ -88,7 +85,7 @@ export function ApiDesignList({ designs }: ApiDesignListProps) {
           ))}
         </div>
       ) : query ? (
-        <Card className="mt-6 border-dashed bg-card/60 p-10 text-center">
+        <Card className="mt-6 p-10 text-center">
           <p className="font-mono text-sm font-semibold">
             {t('noDesignsMatch', { query })}
           </p>

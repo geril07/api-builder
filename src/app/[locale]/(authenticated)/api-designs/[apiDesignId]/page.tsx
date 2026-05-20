@@ -56,9 +56,7 @@ export default async function ApiDesignEditorPage({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="font-mono text-[0.65rem]">
-                {apiDesign.name}
-              </BreadcrumbPage>
+              <BreadcrumbPage>{apiDesign.name}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

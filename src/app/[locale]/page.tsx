@@ -70,7 +70,6 @@ async function HomePage() {
                   href="/dashboard"
                   className={buttonVariants({
                     size: 'sm',
-                    className: 'font-mono',
                   })}
                 >
                   {t('openDashboard')}
@@ -83,7 +82,6 @@ async function HomePage() {
                   className={buttonVariants({
                     variant: 'ghost',
                     size: 'sm',
-                    className: 'font-mono',
                   })}
                 >
                   {t('signIn')}
@@ -113,7 +111,6 @@ async function HomePage() {
                 href="/sign-in"
                 className={buttonVariants({
                   size: 'lg',
-                  className: 'font-mono',
                 })}
               >
                 {t('ctaCreate')}
@@ -123,7 +120,6 @@ async function HomePage() {
                 className={buttonVariants({
                   variant: 'outline',
                   size: 'lg',
-                  className: 'font-mono',
                 })}
               >
                 {t('ctaPreview')}
@@ -161,9 +157,7 @@ async function HomePage() {
                   {t('demoDesignName')}
                 </h2>
               </div>
-              <Button size="sm" className="font-mono">
-                {t('demoExportBtn')}
-              </Button>
+              <Button size="sm">{t('demoExportBtn')}</Button>
             </div>
 
             <div className="relative h-[430px] overflow-hidden border border-border bg-background/70">
@@ -205,10 +199,8 @@ async function HomePage() {
                   {t('demoAiText')}
                 </p>
                 <div className="mt-4 flex gap-2">
-                  <Button size="xs" className="font-mono">
-                    {t('demoAccept')}
-                  </Button>
-                  <Button size="xs" variant="ghost" className="font-mono">
+                  <Button size="xs">{t('demoAccept')}</Button>
+                  <Button size="xs" variant="ghost">
                     {t('demoDismiss')}
                   </Button>
                 </div>
