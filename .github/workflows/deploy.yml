@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create production deployment on Vercel
+        id: deploy
+        run: |
+          deployment_url="$(npx vercel deploy --prod --skip-domain --archive=tgz --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE")"
+          echo "deployment-url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: Apply database migrations
+        run: npm run db:migrate
+
+      - name: Promote deployment to production
+        run: npx vercel promote "${{ steps.deploy.outputs.deployment-url }}" --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE"

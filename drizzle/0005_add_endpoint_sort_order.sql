@@ -1,0 +1,2 @@
+ALTER TABLE "endpoints" ADD COLUMN "sort_order" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+CREATE INDEX "endpoints_resource_sort_order_index" ON "endpoints" USING btree ("resource_id","sort_order");

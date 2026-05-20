@@ -1,0 +1,1 @@
+ALTER TABLE "endpoints" ADD COLUMN "query_params" jsonb DEFAULT '[]'::jsonb NOT NULL;

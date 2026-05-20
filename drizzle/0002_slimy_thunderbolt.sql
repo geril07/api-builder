@@ -1,0 +1,4 @@
+ALTER TABLE "schemas" ADD COLUMN IF NOT EXISTS "position_x" real DEFAULT 0 NOT NULL;
+ALTER TABLE "schemas" ADD COLUMN IF NOT EXISTS "position_y" real DEFAULT 0 NOT NULL;
+ALTER TABLE "auth_schemes" ADD COLUMN IF NOT EXISTS "position_x" real DEFAULT 0 NOT NULL;
+ALTER TABLE "auth_schemes" ADD COLUMN IF NOT EXISTS "position_y" real DEFAULT 0 NOT NULL;

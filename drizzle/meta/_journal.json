@@ -1,0 +1,69 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778525986346,
+      "tag": "0000_pretty_switch",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778748374998,
+      "tag": "0001_faithful_gateway",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778791120000,
+      "tag": "0002_slimy_thunderbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778791120817,
+      "tag": "0003_cuddly_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778999083853,
+      "tag": "0004_aspiring_clea",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779139772016,
+      "tag": "0005_add_endpoint_sort_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779139776629,
+      "tag": "0006_backfill_endpoint_sort_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779265769160,
+      "tag": "0007_rename-api-design-physical-tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779266203826,
+      "tag": "0008_api-design-endpoint-auth-schemes",
+      "breakpoints": true
+    }
+  ]
+}
