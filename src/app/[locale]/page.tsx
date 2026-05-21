@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import type { Metadata } from 'next'
 import {
   Sparkles,
   LayoutList,
@@ -9,7 +10,7 @@ import {
 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-import { Link } from '@/shared/i18n/routing'
+import { Link, routing } from '@/shared/i18n/routing'
 import { LocaleSwitcher } from '@/shared/i18n/locale-switcher'
 import { ThemeToggle } from '@/shared/ui/theme-toggle'
 import { getServerSession } from '@/modules/auth/server'
@@ -53,6 +54,39 @@ const steps = [
 ]
 
 const formats = ['OpenAPI', 'Postman', 'cURL', 'TypeScript']
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Landing' })
+
+  const languages: Record<string, string> = {}
+  for (const l of routing.locales) {
+    languages[l] = l === routing.defaultLocale ? '/' : `/${l}`
+  }
+
+  return {
+    title: t('heroTitle'),
+    description: t('heroSubtitle'),
+    openGraph: {
+      title: t('heroTitle'),
+      description: t('heroSubtitle'),
+      url: '/',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('heroTitle'),
+      description: t('heroSubtitle'),
+    },
+    alternates: {
+      canonical: '/',
+      languages,
+    },
+  }
+}
 
 async function HomePage() {
   const session = await getServerSession()
