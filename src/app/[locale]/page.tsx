@@ -71,6 +71,14 @@ export async function generateMetadata({
   return {
     title: t('heroTitle'),
     description: t('heroSubtitle'),
+    keywords: [
+      'api builder',
+      'api builder ai',
+      'rest api',
+      'api design tool',
+      'visual api editor',
+      'ai rest api',
+    ],
     openGraph: {
       title: t('heroTitle'),
       description: t('heroSubtitle'),
