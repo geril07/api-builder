@@ -1,23 +1,31 @@
 import Image from 'next/image'
-import { Bot, Download, GitBranch, Users } from 'lucide-react'
+import {
+  Sparkles,
+  LayoutList,
+  Download,
+  Code,
+  FileJson,
+  FileCode,
+} from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
 import { Link } from '@/shared/i18n/routing'
 import { LocaleSwitcher } from '@/shared/i18n/locale-switcher'
+import { ThemeToggle } from '@/shared/ui/theme-toggle'
 import { getServerSession } from '@/modules/auth/server'
-import { Button, buttonVariants } from '@/shared/ui/button'
+import { buttonVariants } from '@/shared/ui/button'
 import logo from '../../../logo.svg'
 
 const featureKeys = [
   {
-    icon: Bot,
+    icon: Sparkles,
     titleKey: 'featureAiTitle' as const,
     copyKey: 'featureAiCopy' as const,
   },
   {
-    icon: Users,
-    titleKey: 'featureCollabTitle' as const,
-    copyKey: 'featureCollabCopy' as const,
+    icon: LayoutList,
+    titleKey: 'featureModeTitle' as const,
+    copyKey: 'featureModeCopy' as const,
   },
   {
     icon: Download,
@@ -26,11 +34,25 @@ const featureKeys = [
   },
 ]
 
-const endpoints = [
-  { method: 'GET', path: '/users', tone: 'bg-chart-1/15 text-chart-1' },
-  { method: 'POST', path: '/users', tone: 'bg-chart-2/15 text-chart-2' },
-  { method: 'PATCH', path: '/users/{id}', tone: 'bg-chart-4/15 text-chart-4' },
+const steps = [
+  {
+    icon: Code,
+    titleKey: 'step1Title' as const,
+    copyKey: 'step1Copy' as const,
+  },
+  {
+    icon: FileJson,
+    titleKey: 'step2Title' as const,
+    copyKey: 'step2Copy' as const,
+  },
+  {
+    icon: FileCode,
+    titleKey: 'step3Title' as const,
+    copyKey: 'step3Copy' as const,
+  },
 ]
+
+const formats = ['OpenAPI', 'Postman', 'cURL', 'TypeScript']
 
 async function HomePage() {
   const session = await getServerSession()
@@ -60,6 +82,7 @@ async function HomePage() {
           </a>
 
           <nav className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             <LocaleSwitcher />
             {session ? (
               <>
@@ -76,17 +99,15 @@ async function HomePage() {
                 </Link>
               </>
             ) : (
-              <>
-                <Link
-                  href="/sign-in"
-                  className={buttonVariants({
-                    variant: 'ghost',
-                    size: 'sm',
-                  })}
-                >
-                  {t('signIn')}
-                </Link>
-              </>
+              <Link
+                href="/sign-in"
+                className={buttonVariants({
+                  variant: 'ghost',
+                  size: 'sm',
+                })}
+              >
+                {t('signIn')}
+              </Link>
             )}
           </nav>
         </div>
@@ -97,8 +118,8 @@ async function HomePage() {
         <div className="absolute top-0 right-0 -z-10 h-80 w-80 rounded-full bg-chart-2/20 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 -z-10 h-72 w-72 rounded-full bg-chart-3/20 blur-3xl" />
 
-        <div className="mx-auto grid w-full gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div className="max-w-2xl">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center text-center">
+          <div className="max-w-3xl">
             <h1 className="font-mono text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
               {t('heroTitle')}
             </h1>
@@ -108,7 +129,7 @@ async function HomePage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/sign-in"
+                href={session ? '/dashboard' : '/sign-in'}
                 className={buttonVariants({
                   size: 'lg',
                 })}
@@ -116,7 +137,7 @@ async function HomePage() {
                 {t('ctaCreate')}
               </Link>
               <a
-                href="#export-preview"
+                href="#how-it-works"
                 className={buttonVariants({
                   variant: 'outline',
                   size: 'lg',
@@ -143,87 +164,52 @@ async function HomePage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
 
-          <div
-            id="export-preview"
-            className="relative min-h-[520px] scroll-mt-20 border border-border bg-card/80 p-4 shadow-2xl shadow-black/20 backdrop-blur"
-          >
-            <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
-              <div>
-                <p className="font-mono text-xs text-muted-foreground">
-                  canvas/api-v1
+      <section
+        id="how-it-works"
+        className="scroll-mt-20 border-t border-border px-6 py-24 sm:px-10 lg:px-16"
+      >
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center font-mono text-3xl font-semibold tracking-tight">
+            {t('howItWorksTitle')}
+          </h2>
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {steps.map((step) => (
+              <div key={step.titleKey} className="text-center">
+                <div className="mx-auto flex size-14 items-center justify-center rounded-xl border border-border bg-card shadow-sm">
+                  <step.icon className="size-6 text-primary" />
+                </div>
+                <h3 className="mt-6 font-mono text-base font-medium">
+                  {t(step.titleKey)}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  {t(step.copyKey)}
                 </p>
-                <h2 className="font-mono text-sm font-medium">
-                  {t('demoDesignName')}
-                </h2>
               </div>
-              <Button size="sm">{t('demoExportBtn')}</Button>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="relative h-[430px] overflow-hidden border border-border bg-background/70">
-              <div className="absolute inset-0 bg-[radial-gradient(var(--border)_1px,transparent_1px)] bg-[size:18px_18px] opacity-70" />
-              <div className="absolute top-9 left-8 w-56 border border-border bg-card p-4 shadow-lg">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="font-mono text-sm font-semibold">
-                    {t('demoResourceUsers')}
-                  </span>
-                  <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] text-primary">
-                    {t('demoResourceBadge')}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {endpoints.map((endpoint) => (
-                    <div
-                      key={endpoint.path + endpoint.method}
-                      className="flex items-center gap-2"
-                    >
-                      <span
-                        className={`w-12 px-1.5 py-1 text-center font-mono text-[10px] ${endpoint.tone}`}
-                      >
-                        {endpoint.method}
-                      </span>
-                      <span className="truncate font-mono text-xs text-muted-foreground">
-                        {endpoint.path}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="absolute top-24 right-10 w-56 border border-dashed border-chart-3 bg-chart-3/10 p-4 shadow-lg">
-                <div className="mb-3 flex items-center gap-2 font-mono text-sm font-semibold text-chart-3">
-                  <Bot className="size-4" />
-                  {t('demoAiSuggestion')}
-                </div>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {t('demoAiText')}
-                </p>
-                <div className="mt-4 flex gap-2">
-                  <Button size="xs">{t('demoAccept')}</Button>
-                  <Button size="xs" variant="ghost">
-                    {t('demoDismiss')}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="absolute right-24 bottom-12 w-52 border border-border bg-card p-4 shadow-lg">
-                <div className="mb-3 flex items-center gap-2 font-mono text-sm font-semibold">
-                  <GitBranch className="size-4 text-chart-2" />
-                  {t('demoAuthTitle')}
-                </div>
-                <div className="space-y-2 font-mono text-xs text-muted-foreground">
-                  <p>{t('demoAuthBearer')}</p>
-                  <p>{t('demoAuthPagination')}</p>
-                  <p>{t('demoAuthErrors')}</p>
-                </div>
-              </div>
-
-              <div className="absolute top-[185px] left-[250px] h-px w-32 bg-chart-2" />
-              <div className="absolute top-[185px] left-[372px] size-2 -translate-y-1/2 rounded-full bg-chart-2" />
-              <div className="absolute right-11 bottom-8 border border-chart-1 bg-card px-2 py-1 font-mono text-[10px] text-chart-1 shadow-sm">
-                {t('demoEditing')}
-              </div>
-            </div>
+      <section className="border-t border-border px-6 py-20 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-6xl text-center">
+          <h2 className="font-mono text-3xl font-semibold tracking-tight">
+            {t('exportTitle')}
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t('exportDesc')}
+          </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            {formats.map((format) => (
+              <span
+                key={format}
+                className="rounded-full border border-border bg-card px-5 py-2 font-mono text-xs font-medium text-muted-foreground shadow-sm transition-colors duration-200 hover:border-primary/60 hover:text-foreground"
+              >
+                {format}
+              </span>
+            ))}
           </div>
         </div>
       </section>
