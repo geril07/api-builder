@@ -38,7 +38,7 @@ import {
   EditorPanelHeader,
   resolveEditorPanelState,
   useEditorDelete,
-} from '../editor/editor-panel'
+} from '../sidebar/editor-panel'
 import { ExportDialog } from '../panels/export-dialog'
 import { AiDialog } from '../panels/ai-dialog'
 import {
@@ -50,7 +50,7 @@ import { getFlatCreatePosition } from './create-position'
 import {
   SortableEndpointRow,
   moveEndpoint,
-} from '../editor/sortable-endpoint-row'
+} from '../sidebar/sortable-endpoint-row'
 
 type FlatEditorProps = {
   apiDesignId: string

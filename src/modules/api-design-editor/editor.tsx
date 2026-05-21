@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/utils/cn'
-import { Canvas } from './canvas'
+import { Canvas } from './canvas/canvas'
 import { FlatEditor } from './flat/flat-editor'
 import {
   type EditorMode,

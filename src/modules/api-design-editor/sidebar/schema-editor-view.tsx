@@ -15,11 +15,8 @@ import { SchemaJsonForm } from './schema-json-form'
 import type { ApiDesignSchemaDto } from '@/modules/api-design/schemas'
 import type { ApiDesignEndpointDto } from '@/modules/api-design/endpoints'
 import { updateSchemaMutationOptions } from '../mutations'
-import { useEntityReset } from '../editor/use-entity-reset'
-import {
-  useOnBlurCommit,
-  useOnBlurCommitNullable,
-} from '../editor/use-on-blur-commit'
+import { useEntityReset } from './use-entity-reset'
+import { useOnBlurCommit, useOnBlurCommitNullable } from './use-on-blur-commit'
 
 export type SchemaEditorViewProps = {
   apiDesignId: string

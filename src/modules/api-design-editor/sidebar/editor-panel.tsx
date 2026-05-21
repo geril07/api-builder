@@ -18,10 +18,10 @@ import {
   deleteSchemaMutationOptions,
 } from '../mutations'
 import type { EditorSelection } from '../selection'
-import { AuthSchemeEditorView } from '../sidebar/auth-scheme-editor-view'
-import { EndpointView } from '../sidebar/endpoint-view'
-import { ResourceView } from '../sidebar/resource-view'
-import { SchemaEditorView } from '../sidebar/schema-editor-view'
+import { AuthSchemeEditorView } from './auth-scheme-editor-view'
+import { EndpointView } from './endpoint-view'
+import { ResourceView } from './resource-view'
+import { SchemaEditorView } from './schema-editor-view'
 
 export type EditorPanelData = {
   resources: ApiDesignResourceDto[]

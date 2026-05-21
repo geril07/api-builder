@@ -16,8 +16,8 @@ import { useToast } from '@/shared/ui/toast'
 import { getErrorMessage } from '@/shared/utils/error'
 import type { ApiDesignAuthSchemeDto } from '@/modules/api-design/auth-schemes'
 import { updateAuthSchemeMutationOptions } from '../mutations'
-import { useEntityReset } from '../editor/use-entity-reset'
-import { useOnBlurCommit } from '../editor/use-on-blur-commit'
+import { useEntityReset } from './use-entity-reset'
+import { useOnBlurCommit } from './use-on-blur-commit'
 
 const AUTH_TYPES = ['bearer', 'apiKey', 'oauth2', 'openIdConnect'] as const
 

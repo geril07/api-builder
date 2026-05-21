@@ -15,20 +15,20 @@ import { ResourceNode } from './nodes/resource-node'
 import { SchemaNode } from './nodes/schema-node'
 import { AuthSchemeNode } from './nodes/auth-scheme-node'
 import { SidebarDialog } from './sidebar-dialog'
-import { ExportDialog } from './panels/export-dialog'
-import { AiDialog } from './panels/ai-dialog'
+import { ExportDialog } from '../panels/export-dialog'
+import { AiDialog } from '../panels/ai-dialog'
 import { edgeTypes } from './edges'
 import {
   apiDesignQueryOptions,
   selectApiDesignCanvasData,
   selectApiDesignSidebarData,
   selectApiDesignUpdatedAt,
-} from './queries'
-import { useCanvasNodes } from './canvas/use-canvas-nodes'
-import { CanvasContextMenu } from './canvas/canvas-context-menu'
+} from '../queries'
+import { useCanvasNodes } from './use-canvas-nodes'
+import { CanvasContextMenu } from './canvas-context-menu'
 import { Grid3x3 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import type { useEditorSelection } from './selection'
+import type { useEditorSelection } from '../selection'
 
 const nodeTypes: NodeTypes = {
   resource: ResourceNode,

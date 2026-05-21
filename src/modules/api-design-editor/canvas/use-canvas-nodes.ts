@@ -11,8 +11,8 @@ import {
   autoLayoutMutationOptions,
 } from '../mutations'
 import type { ApiDesignCanvasData } from '../queries'
-import { computeAutoLayout } from '../layout'
-import { computeEdges, type ResourceEdgeData } from '../edges'
+import { computeAutoLayout } from './layout'
+import { computeEdges, type ResourceEdgeData } from './edges'
 
 function resourceNodeMatches(
   node: { type?: string; data: unknown },

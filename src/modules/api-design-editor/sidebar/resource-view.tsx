@@ -22,10 +22,7 @@ import { Label } from '@/shared/ui/label'
 import { useToast } from '@/shared/ui/toast'
 import { getErrorMessage } from '@/shared/utils/error'
 
-import {
-  SortableEndpointRow,
-  moveEndpoint,
-} from '../editor/sortable-endpoint-row'
+import { SortableEndpointRow, moveEndpoint } from './sortable-endpoint-row'
 
 import type { ApiDesignResourceDto } from '@/modules/api-design/resources'
 import type { ApiDesignEndpointDto } from '@/modules/api-design/endpoints'
@@ -35,11 +32,8 @@ import {
   deleteEndpointMutationOptions,
   reorderEndpointsMutationOptions,
 } from '../mutations'
-import { useEntityReset } from '../editor/use-entity-reset'
-import {
-  useOnBlurCommit,
-  useOnBlurCommitNullable,
-} from '../editor/use-on-blur-commit'
+import { useEntityReset } from './use-entity-reset'
+import { useOnBlurCommit, useOnBlurCommitNullable } from './use-on-blur-commit'
 
 export type ResourceViewProps = {
   apiDesignId: string

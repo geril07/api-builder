@@ -25,12 +25,9 @@ import type {
 import type { ApiDesignSchemaDto } from '@/modules/api-design/schemas'
 import type { ApiDesignAuthSchemeDto } from '@/modules/api-design/auth-schemes'
 import { updateEndpointMutationOptions } from '../mutations'
-import { useEntityReset } from '../editor/use-entity-reset'
-import {
-  useOnBlurCommit,
-  useOnBlurCommitNullable,
-} from '../editor/use-on-blur-commit'
-import { SchemaReferenceField } from '../editor/schema-reference-field'
+import { useEntityReset } from './use-entity-reset'
+import { useOnBlurCommit, useOnBlurCommitNullable } from './use-on-blur-commit'
+import { SchemaReferenceField } from './schema-reference-field'
 
 export type EndpointViewProps = {
   apiDesignId: string

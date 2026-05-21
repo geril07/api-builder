@@ -8,7 +8,7 @@ import {
   type EditorPanelState,
   resolveEditorPanelState,
   useEditorDelete,
-} from './editor/editor-panel'
+} from '../sidebar/editor-panel'
 
 type SidebarDialogProps = {
   apiDesignId: string
