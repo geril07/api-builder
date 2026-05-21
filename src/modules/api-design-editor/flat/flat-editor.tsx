@@ -1,11 +1,22 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
+import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react'
+import { isSortable, useSortable } from '@dnd-kit/react/sortable'
+import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
+import { ChevronDown, ChevronRight, GripVertical, Plus } from 'lucide-react'
 
-import { MethodBadge } from '@/modules/api-design/endpoints'
+import { MethodBadge, VALID_METHODS } from '@/modules/api-design/endpoints'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
+import { Input } from '@/shared/ui/input'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/shared/ui/select'
 import { useToast } from '@/shared/ui/toast'
 import { cn } from '@/shared/utils/cn'
 import { getErrorMessage } from '@/shared/utils/error'
@@ -21,6 +32,7 @@ import {
   createEndpointMutationOptions,
   createResourceMutationOptions,
   createSchemaMutationOptions,
+  reorderEndpointsMutationOptions,
 } from '../mutations'
 import {
   EditorPanelHeader,
@@ -52,10 +64,23 @@ export function FlatEditor({
   modeControl,
 }: FlatEditorProps) {
   const t = useTranslations('Editor')
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     ...apiDesignQueryOptions(apiDesignId),
     select: selectApiDesignSidebarData,
   })
+
+  const [expanded, setExpanded] = useState(() => new Set<string>())
+
+  const toggleExpanded = useCallback((id: string) => {
+    setExpanded((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  if (isPending) return <LoadingSkeleton />
 
   if (!data) return null
 
@@ -111,6 +136,8 @@ export function FlatEditor({
               apiDesignId={apiDesignId}
               data={data}
               selection={selection}
+              expanded={expanded}
+              onToggleExpanded={toggleExpanded}
             />
           ) : activeTab === 'schemas' ? (
             <SchemasTab
@@ -170,17 +197,39 @@ function ResourcesTab({
   apiDesignId,
   data,
   selection,
+  expanded,
+  onToggleExpanded,
 }: {
   apiDesignId: string
   data: ApiDesignSidebarData
   selection: ReturnType<typeof useEditorSelection>
+  expanded: Set<string>
+  onToggleExpanded: (id: string) => void
 }) {
   const t = useTranslations('Editor')
-  const [expanded, setExpanded] = useState(() => new Set<string>())
   const createResource = useMutation(createResourceMutationOptions())
   const createEndpoint = useMutation(createEndpointMutationOptions())
+  const reorderEndpoints = useMutation(reorderEndpointsMutationOptions())
   const toast = useToast()
   const resources = buildResourcesWithEndpoints(data)
+  const isReorderPending = reorderEndpoints.isPending
+
+  const [addingEndpointFor, setAddingEndpointFor] = useState<string | null>(
+    null,
+  )
+  const [newMethod, setNewMethod] =
+    useState<(typeof VALID_METHODS)[number]>('GET')
+  const [newPath, setNewPath] = useState('/')
+
+  const verticalModifiers = useMemo(() => [RestrictToVerticalAxis], [])
+
+  const moveEndpoint = <T,>(list: T[], fromIndex: number, toIndex: number) => {
+    const next = [...list]
+    const [removed] = next.splice(fromIndex, 1)
+    if (!removed) return next
+    next.splice(toIndex, 0, removed)
+    return next
+  }
 
   const handleCreateResource = async () => {
     try {
@@ -201,14 +250,14 @@ function ResourcesTab({
   }
 
   const handleCreateEndpoint = async (resourceId: string) => {
+    if (!newPath.trim()) return
     try {
-      const result = await createEndpoint.mutateAsync({
+      await createEndpoint.mutateAsync({
         apiDesignId,
         resourceId,
-        method: 'GET',
-        path: '/',
+        method: newMethod,
+        path: newPath.trim(),
       })
-      selection.selectEndpoint(resourceId, result.id)
     } catch (err) {
       toast.add({
         title: t('failedCreateEndpoint'),
@@ -216,6 +265,42 @@ function ResourcesTab({
         type: 'error',
       })
     }
+    setAddingEndpointFor(null)
+    setNewMethod('GET')
+    setNewPath('/')
+  }
+
+  const handleEndpointDragEnd = (event: DragEndEvent, resourceId: string) => {
+    if (event.canceled || isReorderPending) return
+
+    const { source } = event.operation
+    if (!isSortable(source) || source.initialIndex === source.index) return
+
+    const resource = resources.find((r) => r.resource.id === resourceId)
+    if (!resource) return
+
+    const orderedEndpoints = moveEndpoint(
+      resource.endpoints,
+      source.initialIndex,
+      source.index,
+    )
+
+    reorderEndpoints.mutate(
+      {
+        apiDesignId,
+        resourceId,
+        endpointIds: orderedEndpoints.map((ep) => ep.id),
+      },
+      {
+        onError: (err) => {
+          toast.add({
+            title: t('failedReorderEndpoints'),
+            description: getErrorMessage(err),
+            type: 'error',
+          })
+        },
+      },
+    )
   }
 
   if (resources.length === 0) {
@@ -248,14 +333,7 @@ function ResourcesTab({
                   aria-label={
                     isExpanded ? t('collapseResource') : t('expandResource')
                   }
-                  onClick={() => {
-                    setExpanded((current) => {
-                      const next = new Set(current)
-                      if (next.has(resource.id)) next.delete(resource.id)
-                      else next.add(resource.id)
-                      return next
-                    })
-                  }}
+                  onClick={() => onToggleExpanded(resource.id)}
                 >
                   {isExpanded ? (
                     <ChevronDown className="size-3.5" />
@@ -276,31 +354,110 @@ function ResourcesTab({
               </div>
               {isExpanded ? (
                 <div className="border-t border-border bg-muted/20 px-3 py-2">
-                  <div className="space-y-1">
-                    {endpoints.map((endpoint) => (
-                      <button
-                        key={endpoint.id}
-                        type="button"
-                        className="flex w-full items-center gap-2 px-2 py-1.5 text-left hover:bg-background"
-                        onClick={() =>
-                          selection.selectEndpoint(resource.id, endpoint.id)
-                        }
-                      >
-                        <MethodBadge method={endpoint.method} />
-                        <span className="truncate font-mono text-xs">
-                          {endpoint.path}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => handleCreateEndpoint(resource.id)}
-                  >
-                    <Plus className="size-3.5" /> {t('endpoint')}
-                  </Button>
+                  {endpoints.length > 0 ? (
+                    <DragDropProvider
+                      modifiers={verticalModifiers}
+                      onDragEnd={(event) =>
+                        handleEndpointDragEnd(event, resource.id)
+                      }
+                    >
+                      <div className="space-y-1">
+                        {endpoints.map((endpoint, index) => (
+                          <SortableEndpointRow
+                            key={endpoint.id}
+                            endpoint={endpoint}
+                            index={index}
+                            resourceId={resource.id}
+                            dragDisabled={
+                              endpoints.length < 2 || isReorderPending
+                            }
+                            onEndpointClick={selection.selectEndpoint}
+                          />
+                        ))}
+                      </div>
+                    </DragDropProvider>
+                  ) : (
+                    <p className="py-2 text-center text-[0.65rem] text-muted-foreground">
+                      {t('noEndpointsYet')}
+                    </p>
+                  )}
+
+                  {addingEndpointFor === resource.id ? (
+                    <div className="mt-2 flex flex-col gap-1.5 border-t border-border/50 pt-2">
+                      <div className="flex gap-1">
+                        <Select
+                          value={newMethod}
+                          onValueChange={(v) =>
+                            v != null &&
+                            setNewMethod(v as (typeof VALID_METHODS)[number])
+                          }
+                        >
+                          <SelectTrigger size="sm" aria-label={t('httpMethod')}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {VALID_METHODS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          size="sm"
+                          autoFocus
+                          aria-label={t('newEndpointPath')}
+                          value={newPath}
+                          onChange={(e) => setNewPath(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter')
+                              handleCreateEndpoint(resource.id)
+                            if (e.key === 'Escape') {
+                              setAddingEndpointFor(null)
+                              setNewMethod('GET')
+                              setNewPath('/')
+                            }
+                          }}
+                          placeholder={t('pathPlaceholder')}
+                          className="min-w-0 flex-1"
+                        />
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          type="button"
+                          size="xs"
+                          onClick={() => handleCreateEndpoint(resource.id)}
+                        >
+                          {t('add')}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => {
+                            setAddingEndpointFor(null)
+                            setNewMethod('GET')
+                            setNewPath('/')
+                          }}
+                        >
+                          {t('cancel')}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        setAddingEndpointFor(resource.id)
+                        setNewMethod('GET')
+                        setNewPath('/')
+                      }}
+                    >
+                      <Plus className="size-3.5" /> {t('endpoint')}
+                    </Button>
+                  )}
                 </div>
               ) : null}
             </Card>
@@ -475,7 +632,7 @@ function ListCard({
 }) {
   return (
     <Card size="sm" className="gap-1 px-3 py-2">
-      <button type="button" className="text-left" onClick={onClick}>
+      <button type="button" className="w-full text-left" onClick={onClick}>
         {children}
       </button>
     </Card>
@@ -488,9 +645,14 @@ function UsageRefs({ refs }: { refs: FlatUsageReference[] }) {
     return <div className="text-muted-foreground">{t('noEndpointUsage')}</div>
   }
 
+  const MAX_VISIBLE = 3
+  const visible = refs.slice(0, MAX_VISIBLE)
+  const hiddenCount = refs.length - MAX_VISIBLE
+
   return (
     <div className="text-muted-foreground">
-      {t('usedBy')} {refs.map((ref) => ref.label).join(', ')}
+      {t('usedBy')} {visible.map((ref) => ref.label).join(', ')}
+      {hiddenCount > 0 ? `, +${hiddenCount}` : ''}
     </div>
   )
 }
@@ -547,6 +709,110 @@ function FlatDetailPanel({
       />
       <div className="min-h-0 flex-1 overflow-y-auto">{state.content}</div>
       {deleteDialog}
+    </div>
+  )
+}
+
+function SortableEndpointRow({
+  endpoint,
+  index,
+  resourceId,
+  dragDisabled,
+  onEndpointClick,
+}: {
+  endpoint: { id: string; method: string; path: string }
+  index: number
+  resourceId: string
+  dragDisabled: boolean
+  onEndpointClick: (resourceId: string, endpointId: string) => void
+}) {
+  const t = useTranslations('Editor')
+  const { handleRef, ref, isDragging } = useSortable({
+    id: endpoint.id,
+    index,
+    disabled: dragDisabled,
+  })
+
+  return (
+    <div
+      ref={ref}
+      role="button"
+      tabIndex={0}
+      onClick={() => onEndpointClick(resourceId, endpoint.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onEndpointClick(resourceId, endpoint.id)
+        }
+      }}
+      className={cn(
+        'group flex w-full cursor-pointer items-center gap-1.5 px-1 py-1 text-left hover:bg-background',
+        isDragging && 'relative z-10 bg-muted/70 opacity-80',
+      )}
+    >
+      <Button
+        ref={handleRef}
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        aria-label={t('reorderEndpoint')}
+        disabled={dragDisabled}
+        className="shrink-0 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 active:cursor-grabbing disabled:cursor-default disabled:opacity-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical className="size-2.5" />
+      </Button>
+      <span className="flex min-w-0 flex-1 items-center gap-1.5">
+        <MethodBadge method={endpoint.method} />
+        <span className="min-w-0 truncate font-mono text-[0.65rem] text-foreground">
+          {endpoint.path}
+        </span>
+      </span>
+    </div>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-40 animate-pulse rounded bg-muted" />
+          <div className="flex items-center gap-0.5">
+            <div className="h-8 w-20 animate-pulse rounded bg-muted" />
+            <div className="h-8 w-20 animate-pulse rounded bg-muted" />
+            <div className="h-8 w-24 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-8 w-20 animate-pulse rounded bg-muted" />
+          <div className="h-8 w-20 animate-pulse rounded bg-muted" />
+        </div>
+      </div>
+      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="min-h-0 overflow-y-auto border-r border-border p-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+              <div className="h-8 w-24 animate-pulse rounded bg-muted" />
+            </div>
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} size="sm" className="gap-0 py-0">
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    <div className="size-3.5 animate-pulse rounded bg-muted" />
+                    <div className="h-4 flex-1 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="hidden md:flex md:h-full md:items-center md:justify-center">
+          <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+        </div>
+      </div>
     </div>
   )
 }
