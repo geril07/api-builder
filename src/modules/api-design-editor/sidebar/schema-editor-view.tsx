@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Label } from '@/shared/ui/label'
@@ -15,6 +15,11 @@ import { SchemaJsonForm } from './schema-json-form'
 import type { ApiDesignSchemaDto } from '@/modules/api-design/schemas'
 import type { ApiDesignEndpointDto } from '@/modules/api-design/endpoints'
 import { updateSchemaMutationOptions } from '../mutations'
+import { useEntityReset } from '../editor/use-entity-reset'
+import {
+  useOnBlurCommit,
+  useOnBlurCommitNullable,
+} from '../editor/use-on-blur-commit'
 
 export type SchemaEditorViewProps = {
   apiDesignId: string
@@ -82,21 +87,16 @@ export function SchemaEditorView({
     schema.jsonSchema as Record<string, unknown>,
   )
   const [formWarning, setFormWarning] = useState<string | null>(null)
-  const prevId = useRef(schema.id)
-
-  useEffect(() => {
-    if (prevId.current !== schema.id) {
-      prevId.current = schema.id
-      setName(schema.name)
-      setDescription(schema.description ?? '')
-      const initial = schema.jsonSchema as Record<string, unknown>
-      setJsonText(JSON.stringify(initial, null, 2))
-      setParsedSchema(initial)
-      setJsonError(null)
-      setFormWarning(null)
-      setMode('raw')
-    }
-  }, [schema.id, schema.name, schema.description, schema.jsonSchema])
+  useEntityReset(schema.id, () => {
+    setName(schema.name)
+    setDescription(schema.description ?? '')
+    const initial = schema.jsonSchema as Record<string, unknown>
+    setJsonText(JSON.stringify(initial, null, 2))
+    setParsedSchema(initial)
+    setJsonError(null)
+    setFormWarning(null)
+    setMode('raw')
+  })
 
   const callUpdateSchema = async (updates: {
     name?: string
@@ -118,19 +118,17 @@ export function SchemaEditorView({
     }
   }
 
-  const handleNameBlur = () => {
-    const trimmed = name.trim()
-    if (trimmed !== schema.name && trimmed) {
-      callUpdateSchema({ name: trimmed })
-    }
-  }
+  const handleNameBlur = useOnBlurCommit(name, schema.name, (v) => {
+    callUpdateSchema({ name: v })
+  })
 
-  const handleDescriptionBlur = () => {
-    const trimmed = description.trim()
-    if (trimmed !== (schema.description ?? '')) {
-      callUpdateSchema({ description: trimmed || null })
-    }
-  }
+  const handleDescriptionBlur = useOnBlurCommitNullable(
+    description,
+    schema.description,
+    (v) => {
+      callUpdateSchema({ description: v })
+    },
+  )
 
   const commitSchema = (jsonSchema: unknown) => {
     callUpdateSchema({ jsonSchema })

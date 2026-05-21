@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Label } from '@/shared/ui/label'
@@ -16,6 +16,8 @@ import { useToast } from '@/shared/ui/toast'
 import { getErrorMessage } from '@/shared/utils/error'
 import type { ApiDesignAuthSchemeDto } from '@/modules/api-design/auth-schemes'
 import { updateAuthSchemeMutationOptions } from '../mutations'
+import { useEntityReset } from '../editor/use-entity-reset'
+import { useOnBlurCommit } from '../editor/use-on-blur-commit'
 
 const AUTH_TYPES = ['bearer', 'apiKey', 'oauth2', 'openIdConnect'] as const
 
@@ -37,17 +39,12 @@ export function AuthSchemeEditorView({
     JSON.stringify(authScheme.config, null, 2),
   )
   const [configError, setConfigError] = useState<string | null>(null)
-  const prevId = useRef(authScheme.id)
-
-  useEffect(() => {
-    if (prevId.current !== authScheme.id) {
-      prevId.current = authScheme.id
-      setName(authScheme.name)
-      setType(authScheme.type as (typeof AUTH_TYPES)[number])
-      setConfigText(JSON.stringify(authScheme.config, null, 2))
-      setConfigError(null)
-    }
-  }, [authScheme.id, authScheme.name, authScheme.type, authScheme.config])
+  useEntityReset(authScheme.id, () => {
+    setName(authScheme.name)
+    setType(authScheme.type as (typeof AUTH_TYPES)[number])
+    setConfigText(JSON.stringify(authScheme.config, null, 2))
+    setConfigError(null)
+  })
 
   const callUpdateAuthScheme = async (updates: {
     name?: string
@@ -69,12 +66,9 @@ export function AuthSchemeEditorView({
     }
   }
 
-  const handleNameBlur = () => {
-    const trimmed = name.trim()
-    if (trimmed !== authScheme.name && trimmed) {
-      callUpdateAuthScheme({ name: trimmed })
-    }
-  }
+  const handleNameBlur = useOnBlurCommit(name, authScheme.name, (v) => {
+    callUpdateAuthScheme({ name: v })
+  })
 
   const handleTypeChange = (newType: (typeof AUTH_TYPES)[number]) => {
     if (newType !== authScheme.type) {

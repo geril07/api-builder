@@ -4,16 +4,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Textarea } from '@/shared/ui/textarea'
-import {
-  Combobox,
-  ComboboxTrigger,
-  ComboboxValue,
-  ComboboxContent,
-  ComboboxInput,
-  ComboboxList,
-  ComboboxItem,
-  ComboboxEmpty,
-} from '@/shared/ui/combobox'
+
 import {
   Select,
   SelectTrigger,
@@ -25,7 +16,7 @@ import { Label } from '@/shared/ui/label'
 import { useToast } from '@/shared/ui/toast'
 import { getErrorMessage } from '@/shared/utils/error'
 import { VALID_METHODS } from '@/modules/api-design/endpoints'
-import { ArrowUpRight, Plus, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { EMPTY_ARR } from '@/shared/utils/arrays'
 import type {
   ApiDesignEndpointDto,
@@ -34,6 +25,12 @@ import type {
 import type { ApiDesignSchemaDto } from '@/modules/api-design/schemas'
 import type { ApiDesignAuthSchemeDto } from '@/modules/api-design/auth-schemes'
 import { updateEndpointMutationOptions } from '../mutations'
+import { useEntityReset } from '../editor/use-entity-reset'
+import {
+  useOnBlurCommit,
+  useOnBlurCommitNullable,
+} from '../editor/use-on-blur-commit'
+import { SchemaReferenceField } from '../editor/schema-reference-field'
 
 export type EndpointViewProps = {
   apiDesignId: string
@@ -104,48 +101,31 @@ export function EndpointView({
       : 'inline',
   )
 
-  const prevId = useRef(endpoint.id)
+  useEntityReset(endpoint.id, () => {
+    setMethod(endpoint.method)
+    setPath(endpoint.path)
+    setSummary(endpoint.summary ?? '')
+    setRequestBody(String(endpoint.requestBody ?? ''))
+    setResponseShape(String(endpoint.responseShape ?? ''))
+    setAuthSchemeIds(endpoint.authSchemeIds ?? EMPTY_ARR)
+    setQueryParams(endpoint.queryParams ?? EMPTY_ARR)
+    queryParamsDirtyRef.current = false
+    const hasRequestBodyRef =
+      endpoint.requestBodySchemaId &&
+      schemas.some((s) => s.id === endpoint.requestBodySchemaId)
+    const hasResponseShapeRef =
+      endpoint.responseShapeSchemaId &&
+      schemas.some((s) => s.id === endpoint.responseShapeSchemaId)
 
-  useEffect(() => {
-    if (prevId.current !== endpoint.id) {
-      prevId.current = endpoint.id
-      setMethod(endpoint.method)
-      setPath(endpoint.path)
-      setSummary(endpoint.summary ?? '')
-      setRequestBody(String(endpoint.requestBody ?? ''))
-      setResponseShape(String(endpoint.responseShape ?? ''))
-      setAuthSchemeIds(endpoint.authSchemeIds ?? EMPTY_ARR)
-      setQueryParams(endpoint.queryParams ?? EMPTY_ARR)
-      queryParamsDirtyRef.current = false
-      const hasRequestBodyRef =
-        endpoint.requestBodySchemaId &&
-        schemas.some((s) => s.id === endpoint.requestBodySchemaId)
-      const hasResponseShapeRef =
-        endpoint.responseShapeSchemaId &&
-        schemas.some((s) => s.id === endpoint.responseShapeSchemaId)
-
-      setRequestBodySchemaId(
-        hasRequestBodyRef ? endpoint.requestBodySchemaId : null,
-      )
-      setResponseShapeSchemaId(
-        hasResponseShapeRef ? endpoint.responseShapeSchemaId : null,
-      )
-      setRequestBodyMode(hasRequestBodyRef ? 'reference' : 'inline')
-      setResponseShapeMode(hasResponseShapeRef ? 'reference' : 'inline')
-    }
-  }, [
-    endpoint.id,
-    endpoint.method,
-    endpoint.path,
-    endpoint.summary,
-    endpoint.requestBody,
-    endpoint.responseShape,
-    endpoint.authSchemeIds,
-    endpoint.queryParams,
-    endpoint.requestBodySchemaId,
-    endpoint.responseShapeSchemaId,
-    schemas,
-  ])
+    setRequestBodySchemaId(
+      hasRequestBodyRef ? endpoint.requestBodySchemaId : null,
+    )
+    setResponseShapeSchemaId(
+      hasResponseShapeRef ? endpoint.responseShapeSchemaId : null,
+    )
+    setRequestBodyMode(hasRequestBodyRef ? 'reference' : 'inline')
+    setResponseShapeMode(hasResponseShapeRef ? 'reference' : 'inline')
+  })
 
   const callUpdateEndpoint = async (
     updates: Partial<{
@@ -175,19 +155,15 @@ export function EndpointView({
     }
   }
 
-  const handlePathBlur = () => {
-    const trimmed = path.trim()
-    if (trimmed && trimmed !== endpoint.path) {
-      callUpdateEndpoint({ path: trimmed })
-    }
-  }
+  const handlePathBlur = useOnBlurCommit(path, endpoint.path, (v) =>
+    callUpdateEndpoint({ path: v }),
+  )
 
-  const handleSummaryBlur = () => {
-    const trimmed = summary.trim()
-    if (trimmed !== (endpoint.summary ?? '')) {
-      callUpdateEndpoint({ summary: trimmed || null })
-    }
-  }
+  const handleSummaryBlur = useOnBlurCommitNullable(
+    summary,
+    endpoint.summary,
+    (v) => callUpdateEndpoint({ summary: v }),
+  )
 
   const handleRequestBodyBlur = () => {
     const trimmed = requestBody.trim()
@@ -502,176 +478,40 @@ export function EndpointView({
           </div>
 
           {method !== 'GET' ? (
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label>{t('requestBody')}</Label>
-                <div className="flex items-center gap-0">
-                  <Button
-                    type="button"
-                    variant={
-                      requestBodyMode === 'inline' ? 'default' : 'outline'
-                    }
-                    size="xs"
-                    onClick={() => handleRequestBodyModeChange('inline')}
-                  >
-                    {t('inline')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={
-                      requestBodyMode === 'reference' ? 'default' : 'outline'
-                    }
-                    size="xs"
-                    onClick={() => handleRequestBodyModeChange('reference')}
-                  >
-                    {t('reference')}
-                  </Button>
-                </div>
-              </div>
-              {requestBodyMode === 'reference' && (
-                <div className="flex items-center gap-1">
-                  <Combobox
-                    items={schemas}
-                    value={
-                      schemas.find((s) => s.id === requestBodySchemaId) ?? null
-                    }
-                    onValueChange={handleRequestBodySchemaChange}
-                    isItemEqualToValue={(a, b) => b != null && a.id === b.id}
-                    itemToStringLabel={(s) => s.name}
-                  >
-                    <ComboboxTrigger
-                      aria-label={t('requestBodySchema')}
-                      className="flex-1"
-                    >
-                      <ComboboxValue placeholder={t('selectSchema')} />
-                    </ComboboxTrigger>
-                    <ComboboxContent>
-                      <ComboboxInput
-                        placeholder={t('searchSchemas')}
-                        showTrigger={false}
-                      />
-                      <ComboboxList>
-                        {(schema: ApiDesignSchemaDto) => (
-                          <ComboboxItem key={schema.id} value={schema}>
-                            {schema.name}
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                      <ComboboxEmpty>{t('noSchemasFound')}</ComboboxEmpty>
-                    </ComboboxContent>
-                  </Combobox>
-                  {requestBodySchemaId && onSchemaClick && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => onSchemaClick(requestBodySchemaId)}
-                      aria-label={t('openSchemaInEditor')}
-                    >
-                      <ArrowUpRight className="size-3" />
-                    </Button>
-                  )}
-                </div>
-              )}
-              {requestBodyMode !== 'reference' ? (
-                <Textarea
-                  aria-label={t('requestBodyJson')}
-                  value={requestBody}
-                  onChange={(e) => setRequestBody(e.target.value)}
-                  onBlur={handleRequestBodyBlur}
-                  readOnly={isRequestBodyReadOnly}
-                  rows={5}
-                  placeholder={t('requestBodyJsonPlaceholder')}
-                />
-              ) : null}
-            </div>
+            <SchemaReferenceField
+              label={t('requestBody')}
+              mode={requestBodyMode}
+              onModeChange={handleRequestBodyModeChange}
+              inlineValue={requestBody}
+              onInlineChange={setRequestBody}
+              onInlineBlur={handleRequestBodyBlur}
+              readOnly={isRequestBodyReadOnly}
+              schemaId={requestBodySchemaId}
+              schemas={schemas}
+              onSchemaSelect={handleRequestBodySchemaChange}
+              onSchemaClick={onSchemaClick}
+              textareaPlaceholder={t('requestBodyJsonPlaceholder')}
+              comboboxLabel={t('requestBodySchema')}
+              searchPlaceholder={t('searchSchemas')}
+            />
           ) : null}
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label>{t('responseShape')}</Label>
-              <div className="flex items-center gap-0">
-                <Button
-                  type="button"
-                  variant={
-                    responseShapeMode === 'inline' ? 'default' : 'outline'
-                  }
-                  size="xs"
-                  onClick={() => handleResponseShapeModeChange('inline')}
-                  className="rounded-r-none"
-                >
-                  {t('inline')}
-                </Button>
-                <Button
-                  type="button"
-                  variant={
-                    responseShapeMode === 'reference' ? 'default' : 'outline'
-                  }
-                  size="xs"
-                  onClick={() => handleResponseShapeModeChange('reference')}
-                  className="rounded-l-none border-l-0"
-                >
-                  {t('reference')}
-                </Button>
-              </div>
-            </div>
-            {responseShapeMode === 'reference' && (
-              <div className="flex items-center gap-1">
-                <Combobox
-                  items={schemas}
-                  value={
-                    schemas.find((s) => s.id === responseShapeSchemaId) ?? null
-                  }
-                  onValueChange={handleResponseShapeSchemaChange}
-                  isItemEqualToValue={(a, b) => b != null && a.id === b.id}
-                  itemToStringLabel={(s) => s.name}
-                >
-                  <ComboboxTrigger
-                    aria-label={t('responseShapeSchema')}
-                    className="flex-1"
-                  >
-                    <ComboboxValue placeholder={t('selectSchema')} />
-                  </ComboboxTrigger>
-                  <ComboboxContent>
-                    <ComboboxInput
-                      placeholder={t('searchSchemas')}
-                      showTrigger={false}
-                    />
-                    <ComboboxList>
-                      {(schema: ApiDesignSchemaDto) => (
-                        <ComboboxItem key={schema.id} value={schema}>
-                          {schema.name}
-                        </ComboboxItem>
-                      )}
-                    </ComboboxList>
-                    <ComboboxEmpty>{t('noSchemasFound')}</ComboboxEmpty>
-                  </ComboboxContent>
-                </Combobox>
-                {responseShapeSchemaId && onSchemaClick && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => onSchemaClick(responseShapeSchemaId)}
-                    aria-label={t('openSchemaInEditor')}
-                  >
-                    <ArrowUpRight className="size-3" />
-                  </Button>
-                )}
-              </div>
-            )}
-            {responseShapeMode !== 'reference' ? (
-              <Textarea
-                aria-label={t('responseShapeJson')}
-                value={responseShape}
-                onChange={(e) => setResponseShape(e.target.value)}
-                onBlur={handleResponseShapeBlur}
-                readOnly={isResponseShapeReadOnly}
-                rows={5}
-                placeholder={t('responseShapeJsonPlaceholder')}
-              />
-            ) : null}
-          </div>
+          <SchemaReferenceField
+            label={t('responseShape')}
+            mode={responseShapeMode}
+            onModeChange={handleResponseShapeModeChange}
+            inlineValue={responseShape}
+            onInlineChange={setResponseShape}
+            onInlineBlur={handleResponseShapeBlur}
+            readOnly={isResponseShapeReadOnly}
+            schemaId={responseShapeSchemaId}
+            schemas={schemas}
+            onSchemaSelect={handleResponseShapeSchemaChange}
+            onSchemaClick={onSchemaClick}
+            textareaPlaceholder={t('responseShapeJsonPlaceholder')}
+            comboboxLabel={t('responseShapeSchema')}
+            searchPlaceholder={t('searchSchemas')}
+          />
 
           <div className="space-y-1.5">
             <Label>{t('authSchemes')}</Label>

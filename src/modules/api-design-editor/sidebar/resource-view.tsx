@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react'
@@ -35,6 +35,11 @@ import {
   deleteEndpointMutationOptions,
   reorderEndpointsMutationOptions,
 } from '../mutations'
+import { useEntityReset } from '../editor/use-entity-reset'
+import {
+  useOnBlurCommit,
+  useOnBlurCommitNullable,
+} from '../editor/use-on-blur-commit'
 
 export type ResourceViewProps = {
   apiDesignId: string
@@ -66,7 +71,6 @@ export function ResourceView({
   const [newPath, setNewPath] = useState('/')
   const [endpointListElement, setEndpointListElement] =
     useState<HTMLDivElement | null>(null)
-  const prevId = useRef(resource.id)
   const dragModifiers = useMemo(
     () => [
       RestrictToVerticalAxis,
@@ -77,25 +81,39 @@ export function ResourceView({
     [endpointListElement],
   )
 
-  useEffect(() => {
-    if (prevId.current !== resource.id) {
-      prevId.current = resource.id
-      setName(resource.name)
-      setDescription(resource.description ?? '')
-      setAddingEndpoint(false)
-      setNewMethod('GET')
-      setNewPath('/')
-    }
-  }, [resource.id, resource.name, resource.description])
+  useEntityReset(resource.id, () => {
+    setName(resource.name)
+    setDescription(resource.description ?? '')
+    setAddingEndpoint(false)
+    setNewMethod('GET')
+    setNewPath('/')
+  })
 
-  const handleNameBlur = async () => {
-    const trimmed = name.trim()
-    if (trimmed && trimmed !== resource.name) {
+  const handleNameBlur = useOnBlurCommit(name, resource.name, async (v) => {
+    try {
+      await updateResource.mutateAsync({
+        resourceId: resource.id,
+        apiDesignId,
+        name: v,
+      })
+    } catch (err) {
+      toast.add({
+        title: t('failedUpdateResource'),
+        description: getErrorMessage(err),
+        type: 'error',
+      })
+    }
+  })
+
+  const handleDescriptionBlur = useOnBlurCommitNullable(
+    description,
+    resource.description,
+    async (v) => {
       try {
         await updateResource.mutateAsync({
           resourceId: resource.id,
           apiDesignId,
-          name: trimmed,
+          description: v,
         })
       } catch (err) {
         toast.add({
@@ -104,27 +122,8 @@ export function ResourceView({
           type: 'error',
         })
       }
-    }
-  }
-
-  const handleDescriptionBlur = async () => {
-    const trimmed = description.trim()
-    if (trimmed !== (resource.description ?? '')) {
-      try {
-        await updateResource.mutateAsync({
-          resourceId: resource.id,
-          apiDesignId,
-          description: trimmed || null,
-        })
-      } catch (err) {
-        toast.add({
-          title: t('failedUpdateResource'),
-          description: getErrorMessage(err),
-          type: 'error',
-        })
-      }
-    }
-  }
+    },
+  )
 
   const handleAddEndpoint = async () => {
     if (!newPath.trim()) return
