@@ -1,10 +1,13 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react'
-import { isSortable, useSortable } from '@dnd-kit/react/sortable'
+import { isSortable } from '@dnd-kit/react/sortable'
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
 import { RestrictToElement } from '@dnd-kit/dom/modifiers'
+import { Plus } from 'lucide-react'
+
+import { VALID_METHODS } from '@/modules/api-design/endpoints'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Textarea } from '@/shared/ui/textarea'
@@ -17,11 +20,12 @@ import {
 } from '@/shared/ui/select'
 import { Label } from '@/shared/ui/label'
 import { useToast } from '@/shared/ui/toast'
-import { cn } from '@/shared/utils/cn'
 import { getErrorMessage } from '@/shared/utils/error'
 
-import { MethodBadge, VALID_METHODS } from '@/modules/api-design/endpoints'
-import { GripVertical, Plus, Trash2 } from 'lucide-react'
+import {
+  SortableEndpointRow,
+  moveEndpoint,
+} from '../editor/sortable-endpoint-row'
 
 import type { ApiDesignResourceDto } from '@/modules/api-design/resources'
 import type { ApiDesignEndpointDto } from '@/modules/api-design/endpoints'
@@ -37,20 +41,6 @@ export type ResourceViewProps = {
   resource: ApiDesignResourceDto
   endpoints: ApiDesignEndpointDto[]
   onEndpointClick: (resourceId: string, endpointId: string) => void
-}
-
-const moveEndpoint = (
-  endpointList: ApiDesignEndpointDto[],
-  fromIndex: number,
-  toIndex: number,
-) => {
-  const next = [...endpointList]
-  const [removed] = next.splice(fromIndex, 1)
-
-  if (!removed) return next
-
-  next.splice(toIndex, 0, removed)
-  return next
 }
 
 export function ResourceView({
@@ -270,7 +260,7 @@ export function ResourceView({
                   resourceId={resource.id}
                   dragDisabled={endpoints.length < 2 || isReorderPending}
                   onEndpointClick={onEndpointClick}
-                  onDeleteEndpoint={handleDeleteEndpoint}
+                  onDelete={handleDeleteEndpoint}
                 />
               ))}
             </div>
@@ -349,88 +339,3 @@ export function ResourceView({
     </div>
   )
 }
-
-type SortableEndpointRowProps = {
-  endpoint: ApiDesignEndpointDto
-  index: number
-  resourceId: string
-  dragDisabled: boolean
-  onEndpointClick: (resourceId: string, endpointId: string) => void
-  onDeleteEndpoint: (endpointId: string) => Promise<void>
-}
-
-const SortableEndpointRow = memo(
-  function SortableEndpointRow({
-    endpoint,
-    index,
-    resourceId,
-    dragDisabled,
-    onEndpointClick,
-    onDeleteEndpoint,
-  }: SortableEndpointRowProps) {
-    const t = useTranslations('Editor')
-    const { handleRef, ref, isDragging } = useSortable({
-      id: endpoint.id,
-      index,
-      disabled: dragDisabled,
-    })
-
-    return (
-      <div
-        ref={ref}
-        role="button"
-        tabIndex={0}
-        onClick={() => onEndpointClick(resourceId, endpoint.id)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onEndpointClick(resourceId, endpoint.id)
-          }
-        }}
-        className={cn(
-          'group flex w-full cursor-pointer items-center gap-1.5 px-1 py-1 text-left hover:bg-muted/50',
-          isDragging && 'relative z-10 bg-muted/70 opacity-80',
-        )}
-      >
-        <Button
-          ref={handleRef}
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={t('reorderEndpoint')}
-          disabled={dragDisabled}
-          className="shrink-0 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 active:cursor-grabbing disabled:cursor-default disabled:opacity-0"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="size-2.5" />
-        </Button>
-        <span className="flex min-w-0 flex-1 items-center gap-1.5">
-          <MethodBadge method={endpoint.method} />
-          <span className="min-w-0 truncate font-mono text-[0.65rem] text-foreground">
-            {endpoint.path}
-          </span>
-        </span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={t('deleteEndpoint')}
-          className="shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive focus-visible:text-destructive focus-visible:opacity-100"
-          onClick={async (e) => {
-            e.stopPropagation()
-            await onDeleteEndpoint(endpoint.id)
-          }}
-        >
-          <Trash2 className="size-2.5" />
-        </Button>
-      </div>
-    )
-  },
-  (prev, next) =>
-    prev.endpoint.id === next.endpoint.id &&
-    prev.endpoint.method === next.endpoint.method &&
-    prev.endpoint.path === next.endpoint.path &&
-    prev.index === next.index &&
-    prev.resourceId === next.resourceId &&
-    prev.dragDisabled === next.dragDisabled,
-)

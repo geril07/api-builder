@@ -2,11 +2,11 @@ import { useCallback, useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react'
-import { isSortable, useSortable } from '@dnd-kit/react/sortable'
+import { isSortable } from '@dnd-kit/react/sortable'
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
-import { ChevronDown, ChevronRight, GripVertical, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
 
-import { MethodBadge, VALID_METHODS } from '@/modules/api-design/endpoints'
+import { VALID_METHODS } from '@/modules/api-design/endpoints'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
@@ -47,6 +47,10 @@ import {
   type FlatUsageReference,
 } from './data'
 import { getFlatCreatePosition } from './create-position'
+import {
+  SortableEndpointRow,
+  moveEndpoint,
+} from '../editor/sortable-endpoint-row'
 
 type FlatEditorProps = {
   apiDesignId: string
@@ -222,14 +226,6 @@ function ResourcesTab({
   const [newPath, setNewPath] = useState('/')
 
   const verticalModifiers = useMemo(() => [RestrictToVerticalAxis], [])
-
-  const moveEndpoint = <T,>(list: T[], fromIndex: number, toIndex: number) => {
-    const next = [...list]
-    const [removed] = next.splice(fromIndex, 1)
-    if (!removed) return next
-    next.splice(toIndex, 0, removed)
-    return next
-  }
 
   const handleCreateResource = async () => {
     try {
@@ -709,65 +705,6 @@ function FlatDetailPanel({
       />
       <div className="min-h-0 flex-1 overflow-y-auto">{state.content}</div>
       {deleteDialog}
-    </div>
-  )
-}
-
-function SortableEndpointRow({
-  endpoint,
-  index,
-  resourceId,
-  dragDisabled,
-  onEndpointClick,
-}: {
-  endpoint: { id: string; method: string; path: string }
-  index: number
-  resourceId: string
-  dragDisabled: boolean
-  onEndpointClick: (resourceId: string, endpointId: string) => void
-}) {
-  const t = useTranslations('Editor')
-  const { handleRef, ref, isDragging } = useSortable({
-    id: endpoint.id,
-    index,
-    disabled: dragDisabled,
-  })
-
-  return (
-    <div
-      ref={ref}
-      role="button"
-      tabIndex={0}
-      onClick={() => onEndpointClick(resourceId, endpoint.id)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onEndpointClick(resourceId, endpoint.id)
-        }
-      }}
-      className={cn(
-        'group flex w-full cursor-pointer items-center gap-1.5 px-1 py-1 text-left hover:bg-background',
-        isDragging && 'relative z-10 bg-muted/70 opacity-80',
-      )}
-    >
-      <Button
-        ref={handleRef}
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        aria-label={t('reorderEndpoint')}
-        disabled={dragDisabled}
-        className="shrink-0 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 active:cursor-grabbing disabled:cursor-default disabled:opacity-0"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVertical className="size-2.5" />
-      </Button>
-      <span className="flex min-w-0 flex-1 items-center gap-1.5">
-        <MethodBadge method={endpoint.method} />
-        <span className="min-w-0 truncate font-mono text-[0.65rem] text-foreground">
-          {endpoint.path}
-        </span>
-      </span>
     </div>
   )
 }
