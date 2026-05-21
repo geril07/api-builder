@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react'
 import { isSortable } from '@dnd-kit/react/sortable'
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
+import { RestrictToElement } from '@dnd-kit/dom/modifiers'
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
 
 import { VALID_METHODS } from '@/modules/api-design/endpoints'
@@ -100,7 +101,6 @@ export function FlatEditor({
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          {modeControl}
           <div className="flex border border-border bg-card p-0.5">
             <TabButton
               active={activeTab === 'resources'}
@@ -123,6 +123,7 @@ export function FlatEditor({
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          {modeControl}
           <ExportDialog apiDesignId={apiDesignId} />
           <AiDialog apiDesignId={apiDesignId} />
         </div>
@@ -224,8 +225,6 @@ function ResourcesTab({
   const [newMethod, setNewMethod] =
     useState<(typeof VALID_METHODS)[number]>('GET')
   const [newPath, setNewPath] = useState('/')
-
-  const verticalModifiers = useMemo(() => [RestrictToVerticalAxis], [])
 
   const handleCreateResource = async () => {
     try {
@@ -351,27 +350,15 @@ function ResourcesTab({
               {isExpanded ? (
                 <div className="border-t border-border bg-muted/20 px-3 py-2">
                   {endpoints.length > 0 ? (
-                    <DragDropProvider
-                      modifiers={verticalModifiers}
+                    <EndpointSortableList
+                      endpoints={endpoints}
+                      resourceId={resource.id}
+                      isReorderPending={isReorderPending}
+                      onEndpointClick={selection.selectEndpoint}
                       onDragEnd={(event) =>
                         handleEndpointDragEnd(event, resource.id)
                       }
-                    >
-                      <div className="space-y-1">
-                        {endpoints.map((endpoint, index) => (
-                          <SortableEndpointRow
-                            key={endpoint.id}
-                            endpoint={endpoint}
-                            index={index}
-                            resourceId={resource.id}
-                            dragDisabled={
-                              endpoints.length < 2 || isReorderPending
-                            }
-                            onEndpointClick={selection.selectEndpoint}
-                          />
-                        ))}
-                      </div>
-                    </DragDropProvider>
+                    />
                   ) : (
                     <p className="py-2 text-center text-[0.65rem] text-muted-foreground">
                       {t('noEndpointsYet')}
@@ -706,6 +693,46 @@ function FlatDetailPanel({
       <div className="min-h-0 flex-1 overflow-y-auto">{state.content}</div>
       {deleteDialog}
     </div>
+  )
+}
+
+function EndpointSortableList({
+  endpoints,
+  resourceId,
+  isReorderPending,
+  onEndpointClick,
+  onDragEnd,
+}: {
+  endpoints: { id: string; method: string; path: string }[]
+  resourceId: string
+  isReorderPending: boolean
+  onEndpointClick: (resourceId: string, endpointId: string) => void
+  onDragEnd: (event: DragEndEvent) => void
+}) {
+  const [container, setContainer] = useState<HTMLDivElement | null>(null)
+  const modifiers = useMemo(
+    () => [
+      RestrictToVerticalAxis,
+      RestrictToElement.configure({ element: container }),
+    ],
+    [container],
+  )
+
+  return (
+    <DragDropProvider modifiers={modifiers} onDragEnd={onDragEnd}>
+      <div ref={setContainer} className="space-y-1">
+        {endpoints.map((endpoint, index) => (
+          <SortableEndpointRow
+            key={endpoint.id}
+            endpoint={endpoint}
+            index={index}
+            resourceId={resourceId}
+            dragDisabled={endpoints.length < 2 || isReorderPending}
+            onEndpointClick={onEndpointClick}
+          />
+        ))}
+      </div>
+    </DragDropProvider>
   )
 }
 
