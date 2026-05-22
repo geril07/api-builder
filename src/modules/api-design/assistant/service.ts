@@ -29,11 +29,11 @@ export async function agent(
   const tools = createAgentTools(apiDesignId, workspaceId)
 
   const result = streamText({
-    model: openrouter('nvidia/nemotron-3-super-120b-a12b:free', {
+    model: openrouter('google/gemma-4-31b-it:free', {
       extraBody: {
         provider: {
-          only: ['nvidia'],
-          order: ['nvidia'],
+          only: ['google-ai-studio'],
+          order: ['google-ai-studio'],
           allow_fallbacks: false,
         },
       },
