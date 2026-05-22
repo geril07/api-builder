@@ -124,8 +124,10 @@ async function HomePage() {
           </a>
 
           <nav className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
-            <LocaleSwitcher />
+            <div className="flex items-center">
+              <ThemeToggle />
+              <LocaleSwitcher />
+            </div>
             {session ? (
               <>
                 <span className="hidden max-w-40 truncate font-mono text-xs text-muted-foreground sm:block">
