@@ -1,21 +1,63 @@
-# Next.js template
+# API Builder
 
-This is a Next.js template with shadcn/ui.
+<p align="center">
+  <img src="logo.svg" alt="API Builder" width="400">
+</p>
 
-## Adding components
+A visual REST API design tool with canvas and flat editing modes. Define Resources, Endpoints, Schemas, and Auth Schemes, get AI-powered suggestions, and export to OpenAPI.
 
-To add components to your app, run the following command:
+## Features
+
+- **Canvas Mode** — spatial editor with draggable nodes and derived connection edges
+- **Flat Mode** — tabbed lists with a detail panel for keyboard-first editing
+- **AI Assistant** — AI-powered suggestions for endpoints, schemas, and more
+- **OpenAPI Export** — export your API design to OpenAPI 3.0/3.1
+- **Auth & Workspaces** — team workspaces with built-in authentication
+- **Schemas** — reusable JSON Schema definitions across endpoints
+- **Query Parameters** — define query params per endpoint with type and constraints
+
+## Tech Stack
+
+| Category  | Technology                                          |
+| --------- | --------------------------------------------------- |
+| Framework | Next.js 16 (App Router, Turbopack), React 19        |
+| Language  | TypeScript 5.9                                      |
+| Database  | PostgreSQL + Drizzle ORM                            |
+| Auth      | Better Auth                                         |
+| AI        | AI SDK, Google / OpenRouter providers               |
+| RPC       | oRPC (server, client, TanStack Query integration)   |
+| UI        | Tailwind CSS 4, shadcn/ui, Base UI, xyflow (canvas) |
+
+## Getting Started
 
 ```bash
-npx shadcn@latest add button
+# Prerequisites: Node >=22, PostgreSQL
+
+cp .env.example .env        # configure your environment
+npm install                  # install dependencies
+npm run db:push              # push schema to database
+npm run dev                  # start development server
 ```
 
-This will place the ui components in the `components` directory.
+## Scripts
 
-## Using components
+| Command               | Description                  |
+| --------------------- | ---------------------------- |
+| `npm run dev`         | Start dev server (port 3005) |
+| `npm run build`       | Production build             |
+| `npm run test`        | Run tests (Vitest)           |
+| `npm run lint`        | Lint code (ESLint)           |
+| `npm run typecheck`   | Type-check (tsc --noEmit)    |
+| `npm run format`      | Format code (Prettier)       |
+| `npm run db:generate` | Generate Drizzle migrations  |
+| `npm run db:migrate`  | Run Drizzle migrations       |
+| `npm run db:studio`   | Open Drizzle Studio          |
 
-To use the components in your app, import them as follows:
+## Project Structure
 
-```tsx
-import { Button } from '@/components/ui/button'
+```
+src/
+  app/        Next.js routes, layouts, route handlers
+  modules/    Domain or features logic (api-design, auth, ...)
+  shared/     Generic reusable infrastructure, UI primitives, utilities
 ```
