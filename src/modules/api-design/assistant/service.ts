@@ -10,8 +10,6 @@ const openrouter = createOpenRouter({
   apiKey: envConfig.OPENROUTER_API_KEY,
 })
 
-const MODEL = 'tencent/hy3-preview'
-
 export async function agent(
   apiDesignId: string,
   workspaceId: string,
@@ -31,11 +29,11 @@ export async function agent(
   const tools = createAgentTools(apiDesignId, workspaceId)
 
   const result = streamText({
-    model: openrouter(MODEL, {
+    model: openrouter('openrouter/owl-alpha', {
       extraBody: {
         provider: {
-          only: ['siliconflow'],
-          order: ['siliconflow'],
+          only: ['stealth/int8'],
+          order: ['stealth/int8'],
           allow_fallbacks: false,
         },
       },
