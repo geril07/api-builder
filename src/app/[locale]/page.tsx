@@ -165,29 +165,9 @@ async function HomePage() {
             <h1 className="font-mono text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
               {t('heroTitle')}
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+            <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
               {t('heroSubtitle')}
             </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href={session ? '/dashboard' : '/sign-in'}
-                className={buttonVariants({
-                  size: 'lg',
-                })}
-              >
-                {t('ctaCreate')}
-              </Link>
-              <a
-                href="#how-it-works"
-                className={buttonVariants({
-                  variant: 'outline',
-                  size: 'lg',
-                })}
-              >
-                {t('ctaPreview')}
-              </a>
-            </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {featureKeys.map((feature) => (
