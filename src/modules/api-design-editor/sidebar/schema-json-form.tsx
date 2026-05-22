@@ -246,9 +246,17 @@ function ObjectPropertiesEditor({
   }
 
   const handleAdd = () => {
+    const baseName = 'newProperty'
+    const existingNames = new Set(properties.map((p) => p.name))
+    let name = baseName
+    let counter = 1
+    while (existingNames.has(name)) {
+      name = `${baseName}${counter}`
+      counter++
+    }
     const newProperties = [
       ...properties,
-      { name: '', schema: { type: 'string' } as JsonSchema, required: false },
+      { name, schema: { type: 'string' } as JsonSchema, required: false },
     ]
     updateProperties(newProperties)
   }
@@ -536,7 +544,7 @@ function ArrayItemsEditor({
           />
         </div>
       )}
-      {(itemType === 'number' || itemType === 'integer') && (
+      {items && (itemType === 'number' || itemType === 'integer') && (
         <div className="pl-2">
           <NumberConstraintsEditor
             schema={items ?? {}}

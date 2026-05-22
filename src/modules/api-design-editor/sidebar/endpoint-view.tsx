@@ -252,6 +252,9 @@ export function EndpointView({
       queryParamsDirtyRef.current = true
       return prev.map((p, i) => (i === index ? { ...p, ...updates } : p))
     })
+    if (!('name' in updates) && !('description' in updates)) {
+      setTimeout(saveQueryParams, 0)
+    }
   }
 
   const handleAddQueryParam = () => {
@@ -292,7 +295,11 @@ export function EndpointView({
   }
 
   const handleQueryParamNameBlur = () => {
-    saveQueryParams()
+    setTimeout(saveQueryParams, 0)
+  }
+
+  const handleQueryParamDescriptionBlur = () => {
+    setTimeout(saveQueryParams, 0)
   }
 
   const saveQueryParamsRef = useRef(saveQueryParams)
@@ -456,6 +463,7 @@ export function EndpointView({
                           description: e.target.value || null,
                         })
                       }
+                      onBlur={handleQueryParamDescriptionBlur}
                       placeholder={t('descriptionOptional')}
                     />
                   </div>

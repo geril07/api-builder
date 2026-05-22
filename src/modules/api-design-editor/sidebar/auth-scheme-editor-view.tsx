@@ -34,7 +34,9 @@ export function AuthSchemeEditorView({
   const updateAuthScheme = useMutation(updateAuthSchemeMutationOptions())
   const toast = useToast()
   const [name, setName] = useState(authScheme.name)
-  const [type, setType] = useState<(typeof AUTH_TYPES)[number]>('bearer')
+  const [type, setType] = useState<(typeof AUTH_TYPES)[number]>(
+    authScheme.type as (typeof AUTH_TYPES)[number],
+  )
   const [configText, setConfigText] = useState(
     JSON.stringify(authScheme.config, null, 2),
   )
