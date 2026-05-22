@@ -105,3 +105,11 @@ Add test cases:
 - Collection variables beyond `baseUrl`
 - Pre-request scripts or test scripts
 - Examples/response bodies
+
+## Parent
+
+.scratch/multi-export/PRD.md
+
+---
+
+This issue is superseded by the multi-export PRD which covers the full scope. The PRD contains the final implementation decisions (dropdown UI, per-format state, auth mapping, test cases). Refer to the PRD for implementation.
