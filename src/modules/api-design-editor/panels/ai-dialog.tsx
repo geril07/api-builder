@@ -366,13 +366,13 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
         ) : (
           <div
             ref={scrollRef}
-            className="flex max-h-[50vh] flex-col overflow-auto pb-1 font-mono text-sm"
+            className="flex max-h-[50vh] flex-col overflow-auto p-3 font-mono text-sm"
           >
             <div className="mt-auto space-y-3">
               {messages.map((msg, i) => (
                 <div key={i}>
                   {msg.role === 'user' ? (
-                    <div className="rounded-lg bg-muted p-3 text-sm wrap-break-word text-foreground">
+                    <div className="bg-muted p-3 text-sm wrap-break-word text-foreground">
                       {msg.content}
                     </div>
                   ) : (
