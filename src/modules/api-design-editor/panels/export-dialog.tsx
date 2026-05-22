@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { Copy, Download } from 'lucide-react'
+import { Copy, Download, ChevronDown } from 'lucide-react'
 
 import { Label } from '@/shared/ui/label'
 import { Button } from '@/shared/ui/button'
@@ -15,11 +15,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/shared/ui/dropdown-menu'
 import { useToast } from '@/shared/ui/toast'
 import { getErrorMessage } from '@/shared/utils/error'
 import { cn } from '@/shared/utils/cn'
 
 import { orpcTQ } from '@/shared/orpc/client'
+
+type ExportType = 'openapi' | 'postman'
 
 type ExportDialogProps = {
   apiDesignId: string
@@ -27,26 +35,48 @@ type ExportDialogProps = {
 
 export function ExportDialog({ apiDesignId }: ExportDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [format, setFormat] = useState<'json' | 'yaml'>('yaml')
-  const [content, setContent] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [exportType, setExportType] = useState<ExportType>('openapi')
+  const [openapiFormat, setOpenapiFormat] = useState<'json' | 'yaml'>('yaml')
+  const [openapiContent, setOpenapiContent] = useState<string | null>(null)
+  const [openapiCopied, setOpenapiCopied] = useState(false)
+  const [postmanContent, setPostmanContent] = useState<string | null>(null)
+  const [postmanCopied, setPostmanCopied] = useState(false)
   const exportApiDesign = useMutation(
     orpcTQ.apiDesign.export.export.mutationOptions(),
   )
   const toast = useToast()
   const t = useTranslations('Editor')
 
+  const content = exportType === 'openapi' ? openapiContent : postmanContent
+  const copied = exportType === 'openapi' ? openapiCopied : postmanCopied
+
   const resetState = () => {
-    setContent(null)
-    setCopied(false)
+    setOpenapiContent(null)
+    setOpenapiCopied(false)
+    setPostmanContent(null)
+    setPostmanCopied(false)
   }
 
   const handleGenerate = async () => {
-    setCopied(false)
+    if (exportType === 'openapi') {
+      setOpenapiCopied(false)
+    } else {
+      setPostmanCopied(false)
+    }
 
     try {
-      const result = await exportApiDesign.mutateAsync({ apiDesignId, format })
-      setContent(result)
+      const params =
+        exportType === 'openapi'
+          ? ({ apiDesignId, format: openapiFormat } as const)
+          : ({ apiDesignId, format: 'postman' } as const)
+
+      const result = await exportApiDesign.mutateAsync(params)
+
+      if (exportType === 'openapi') {
+        setOpenapiContent(result)
+      } else {
+        setPostmanContent(result)
+      }
     } catch (e) {
       toast.add({
         title: t('failed'),
@@ -60,8 +90,13 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
     if (!content) return
     try {
       await navigator.clipboard.writeText(content)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      if (exportType === 'openapi') {
+        setOpenapiCopied(true)
+        setTimeout(() => setOpenapiCopied(false), 2000)
+      } else {
+        setPostmanCopied(true)
+        setTimeout(() => setPostmanCopied(false), 2000)
+      }
     } catch {
       toast.add({
         title: t('failed'),
@@ -73,13 +108,24 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
   const handleDownload = () => {
     if (!content) return
     try {
-      const ext = format === 'yaml' ? 'yaml' : 'json'
-      const mime = format === 'yaml' ? 'application/x-yaml' : 'application/json'
+      let filename: string
+      let mime: string
+
+      if (exportType === 'openapi') {
+        const ext = openapiFormat === 'yaml' ? 'yaml' : 'json'
+        filename = `openapi.${ext}`
+        mime =
+          openapiFormat === 'yaml' ? 'application/x-yaml' : 'application/json'
+      } else {
+        filename = 'postman-collection.json'
+        mime = 'application/json'
+      }
+
       const blob = new Blob([content], { type: mime })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `openapi.${ext}`
+      a.download = filename
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -91,6 +137,9 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
       })
     }
   }
+
+  const typeLabel =
+    exportType === 'openapi' ? t('openapi') : t('postmanCollection')
 
   return (
     <Dialog
@@ -106,34 +155,57 @@ export function ExportDialog({ apiDesignId }: ExportDialogProps) {
       <DialogContent className="w-[min(92vw,44rem)]">
         <DialogHeader>
           <DialogTitle className="font-mono text-2xl font-semibold tracking-tight">
-            {t('openapiExport')}
+            {exportType === 'openapi' ? t('openapiExport') : t('postmanExport')}
           </DialogTitle>
           <DialogDescription className="text-sm leading-6 text-muted-foreground">
-            {t('exportDescription')}
+            {exportType === 'openapi'
+              ? t('exportDescription')
+              : t('postmanExportDescription')}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-3">
-          <Label htmlFor="export-format">{t('format')}</Label>
-          <div className="flex border border-border">
-            <Button
-              type="button"
-              onClick={() => setFormat('yaml')}
-              variant={format === 'yaml' ? 'default' : 'outline'}
-              className={cn('px-3 py-1.5')}
-            >
-              {t('yaml')}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setFormat('json')}
-              variant={format === 'json' ? 'default' : 'outline'}
-              className={cn('border-l-0 px-3 py-1.5')}
-            >
-              {t('json')}
-            </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="outline" className="justify-between gap-2">
+                <span>{typeLabel}</span>
+                <ChevronDown className="size-4 text-muted-foreground" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="start" sideOffset={4}>
+            <DropdownMenuItem onClick={() => setExportType('openapi')}>
+              {t('openapi')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setExportType('postman')}>
+              {t('postmanCollection')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {exportType === 'openapi' ? (
+          <div className="flex items-center gap-3">
+            <Label htmlFor="export-format">{t('format')}</Label>
+            <div className="flex border border-border">
+              <Button
+                type="button"
+                onClick={() => setOpenapiFormat('yaml')}
+                variant={openapiFormat === 'yaml' ? 'default' : 'outline'}
+                className={cn('px-3 py-1.5')}
+              >
+                {t('yaml')}
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setOpenapiFormat('json')}
+                variant={openapiFormat === 'json' ? 'default' : 'outline'}
+                className={cn('border-l-0 px-3 py-1.5')}
+              >
+                {t('json')}
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="flex items-center gap-2">
           <Button
