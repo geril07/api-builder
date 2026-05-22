@@ -5,7 +5,7 @@ import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react'
 import { isSortable } from '@dnd-kit/react/sortable'
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
 import { RestrictToElement } from '@dnd-kit/dom/modifiers'
-import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Search } from 'lucide-react'
 
 import { VALID_METHODS } from '@/modules/api-design/endpoints'
 import { Button } from '@/shared/ui/button'
@@ -48,6 +48,7 @@ import {
   type FlatUsageReference,
 } from './data'
 import { getFlatCreatePosition } from './create-position'
+import { filterAuthSchemes, filterResources, filterSchemas } from './search'
 import {
   SortableEndpointRow,
   moveEndpoint,
@@ -219,6 +220,12 @@ function ResourcesTab({
   const resources = buildResourcesWithEndpoints(data)
   const isReorderPending = reorderEndpoints.isPending
 
+  const [search, setSearch] = useState('')
+  const filteredResources = useMemo(
+    () => filterResources(resources, search),
+    [resources, search],
+  )
+
   const [addingEndpointFor, setAddingEndpointFor] = useState<string | null>(
     null,
   )
@@ -316,137 +323,156 @@ function ResourcesTab({
           <Plus className="size-3.5" /> {t('resource')}
         </Button>
       </div>
-      <div className="space-y-2">
-        {resources.map(({ resource, endpoints }) => {
-          const isExpanded = expanded.has(resource.id)
-          return (
-            <Card key={resource.id} size="sm" className="gap-0 py-0">
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60">
-                <button
-                  type="button"
-                  className="text-muted-foreground"
-                  aria-label={
-                    isExpanded ? t('collapseResource') : t('expandResource')
-                  }
-                  onClick={() => onToggleExpanded(resource.id)}
-                >
-                  {isExpanded ? (
-                    <ChevronDown className="size-3.5" />
-                  ) : (
-                    <ChevronRight className="size-3.5" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="min-w-0 flex-1 truncate text-left font-medium"
-                  onClick={() => selection.selectResource(resource.id)}
-                >
-                  {resource.name}
-                </button>
-                <span className="text-[0.65rem] text-muted-foreground">
-                  {t('endpointsCount', { count: endpoints.length })}
-                </span>
-              </div>
-              {isExpanded ? (
-                <div className="border-t border-border bg-muted/20 px-3 py-2">
-                  {endpoints.length > 0 ? (
-                    <EndpointSortableList
-                      endpoints={endpoints}
-                      resourceId={resource.id}
-                      isReorderPending={isReorderPending}
-                      onEndpointClick={selection.selectEndpoint}
-                      onDragEnd={(event) =>
-                        handleEndpointDragEnd(event, resource.id)
-                      }
-                    />
-                  ) : (
-                    <p className="py-2 text-center text-[0.65rem] text-muted-foreground">
-                      {t('noEndpointsYet')}
-                    </p>
-                  )}
+      <div className="relative">
+        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          size="sm"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('search')}
+          className="pl-8"
+        />
+      </div>
+      {filteredResources.length === 0 ? (
+        <p className="py-8 text-center text-xs text-muted-foreground">
+          {t('noMatching')}
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {filteredResources.map(({ resource, endpoints }) => {
+            const isExpanded = expanded.has(resource.id)
+            return (
+              <Card key={resource.id} size="sm" className="gap-0 py-0">
+                <div className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60">
+                  <button
+                    type="button"
+                    className="text-muted-foreground"
+                    aria-label={
+                      isExpanded ? t('collapseResource') : t('expandResource')
+                    }
+                    onClick={() => onToggleExpanded(resource.id)}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="size-3.5" />
+                    ) : (
+                      <ChevronRight className="size-3.5" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 truncate text-left font-medium"
+                    onClick={() => selection.selectResource(resource.id)}
+                  >
+                    {resource.name}
+                  </button>
+                  <span className="text-[0.65rem] text-muted-foreground">
+                    {t('endpointsCount', { count: endpoints.length })}
+                  </span>
+                </div>
+                {isExpanded ? (
+                  <div className="border-t border-border bg-muted/20 px-3 py-2">
+                    {endpoints.length > 0 ? (
+                      <EndpointSortableList
+                        endpoints={endpoints}
+                        resourceId={resource.id}
+                        isReorderPending={isReorderPending}
+                        onEndpointClick={selection.selectEndpoint}
+                        onDragEnd={(event) =>
+                          handleEndpointDragEnd(event, resource.id)
+                        }
+                      />
+                    ) : (
+                      <p className="py-2 text-center text-[0.65rem] text-muted-foreground">
+                        {t('noEndpointsYet')}
+                      </p>
+                    )}
 
-                  {addingEndpointFor === resource.id ? (
-                    <div className="mt-2 flex flex-col gap-1.5 border-t border-border/50 pt-2">
-                      <div className="flex gap-1">
-                        <Select
-                          value={newMethod}
-                          onValueChange={(v) =>
-                            v != null &&
-                            setNewMethod(v as (typeof VALID_METHODS)[number])
-                          }
-                        >
-                          <SelectTrigger size="sm" aria-label={t('httpMethod')}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {VALID_METHODS.map((m) => (
-                              <SelectItem key={m} value={m}>
-                                {m}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          size="sm"
-                          autoFocus
-                          aria-label={t('newEndpointPath')}
-                          value={newPath}
-                          onChange={(e) => setNewPath(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter')
-                              handleCreateEndpoint(resource.id)
-                            if (e.key === 'Escape') {
+                    {addingEndpointFor === resource.id ? (
+                      <div className="mt-2 flex flex-col gap-1.5 border-t border-border/50 pt-2">
+                        <div className="flex gap-1">
+                          <Select
+                            value={newMethod}
+                            onValueChange={(v) =>
+                              v != null &&
+                              setNewMethod(v as (typeof VALID_METHODS)[number])
+                            }
+                          >
+                            <SelectTrigger
+                              size="sm"
+                              aria-label={t('httpMethod')}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {VALID_METHODS.map((m) => (
+                                <SelectItem key={m} value={m}>
+                                  {m}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            size="sm"
+                            autoFocus
+                            aria-label={t('newEndpointPath')}
+                            value={newPath}
+                            onChange={(e) => setNewPath(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter')
+                                handleCreateEndpoint(resource.id)
+                              if (e.key === 'Escape') {
+                                setAddingEndpointFor(null)
+                                setNewMethod('GET')
+                                setNewPath('/')
+                              }
+                            }}
+                            placeholder={t('pathPlaceholder')}
+                            className="min-w-0 flex-1"
+                          />
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            size="xs"
+                            onClick={() => handleCreateEndpoint(resource.id)}
+                          >
+                            {t('add')}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="xs"
+                            onClick={() => {
                               setAddingEndpointFor(null)
                               setNewMethod('GET')
                               setNewPath('/')
-                            }
-                          }}
-                          placeholder={t('pathPlaceholder')}
-                          className="min-w-0 flex-1"
-                        />
+                            }}
+                          >
+                            {t('cancel')}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          type="button"
-                          size="xs"
-                          onClick={() => handleCreateEndpoint(resource.id)}
-                        >
-                          {t('add')}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="xs"
-                          onClick={() => {
-                            setAddingEndpointFor(null)
-                            setNewMethod('GET')
-                            setNewPath('/')
-                          }}
-                        >
-                          {t('cancel')}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => {
-                        setAddingEndpointFor(resource.id)
-                        setNewMethod('GET')
-                        setNewPath('/')
-                      }}
-                    >
-                      <Plus className="size-3.5" /> {t('endpoint')}
-                    </Button>
-                  )}
-                </div>
-              ) : null}
-            </Card>
-          )
-        })}
-      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => {
+                          setAddingEndpointFor(resource.id)
+                          setNewMethod('GET')
+                          setNewPath('/')
+                        }}
+                      >
+                        <Plus className="size-3.5" /> {t('endpoint')}
+                      </Button>
+                    )}
+                  </div>
+                ) : null}
+              </Card>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -464,6 +490,12 @@ function SchemasTab({
   const createSchema = useMutation(createSchemaMutationOptions())
   const toast = useToast()
   const { schemaUsage } = buildFlatUsage(data)
+
+  const [search, setSearch] = useState('')
+  const filteredSchemas = useMemo(
+    () => filterSchemas(data.schemas, search),
+    [data.schemas, search],
+  )
 
   const handleCreate = async () => {
     try {
@@ -494,26 +526,46 @@ function SchemasTab({
   }
 
   return (
-    <EntityListHeader
-      title={t('schemas')}
-      action={t('schema')}
-      onCreate={handleCreate}
-    >
-      {data.schemas.map((schema) => (
-        <ListCard
-          key={schema.id}
-          onClick={() => selection.selectSchema(schema.id)}
-        >
-          <div className="font-medium">{schema.name}</div>
-          {schema.description ? (
-            <div className="truncate text-muted-foreground">
-              {schema.description}
-            </div>
-          ) : null}
-          <UsageRefs refs={schemaUsage.get(schema.id) ?? []} />
-        </ListCard>
-      ))}
-    </EntityListHeader>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="font-mono text-xs font-semibold">{t('schemas')}</h2>
+        <Button size="sm" onClick={handleCreate}>
+          <Plus className="size-3.5" /> {t('schema')}
+        </Button>
+      </div>
+      <div className="relative">
+        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          size="sm"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('search')}
+          className="pl-8"
+        />
+      </div>
+      {filteredSchemas.length === 0 ? (
+        <p className="py-8 text-center text-xs text-muted-foreground">
+          {t('noMatching')}
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {filteredSchemas.map((schema) => (
+            <ListCard
+              key={schema.id}
+              onClick={() => selection.selectSchema(schema.id)}
+            >
+              <div className="font-medium">{schema.name}</div>
+              {schema.description ? (
+                <div className="truncate text-muted-foreground">
+                  {schema.description}
+                </div>
+              ) : null}
+              <UsageRefs refs={schemaUsage.get(schema.id) ?? []} />
+            </ListCard>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -530,6 +582,12 @@ function AuthSchemesTab({
   const createAuthScheme = useMutation(createAuthSchemeMutationOptions())
   const toast = useToast()
   const { authSchemeUsage } = buildFlatUsage(data)
+
+  const [search, setSearch] = useState('')
+  const filteredAuthSchemes = useMemo(
+    () => filterAuthSchemes(data.authSchemes, search),
+    [data.authSchemes, search],
+  )
 
   const handleCreate = async () => {
     try {
@@ -561,47 +619,43 @@ function AuthSchemesTab({
   }
 
   return (
-    <EntityListHeader
-      title={t('authSchemes')}
-      action={t('authScheme')}
-      onCreate={handleCreate}
-    >
-      {data.authSchemes.map((authScheme) => (
-        <ListCard
-          key={authScheme.id}
-          onClick={() => selection.selectAuthScheme(authScheme.id)}
-        >
-          <div className="font-medium">{authScheme.name}</div>
-          <div className="font-mono text-[0.65rem] text-muted-foreground">
-            {authScheme.type}
-          </div>
-          <UsageRefs refs={authSchemeUsage.get(authScheme.id) ?? []} />
-        </ListCard>
-      ))}
-    </EntityListHeader>
-  )
-}
-
-function EntityListHeader({
-  title,
-  action,
-  onCreate,
-  children,
-}: {
-  title: string
-  action: string
-  onCreate: () => void
-  children: React.ReactNode
-}) {
-  return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-mono text-xs font-semibold">{title}</h2>
-        <Button size="sm" onClick={onCreate}>
-          <Plus className="size-3.5" /> {action}
+        <h2 className="font-mono text-xs font-semibold">{t('authSchemes')}</h2>
+        <Button size="sm" onClick={handleCreate}>
+          <Plus className="size-3.5" /> {t('authScheme')}
         </Button>
       </div>
-      <div className="space-y-2">{children}</div>
+      <div className="relative">
+        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          size="sm"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('search')}
+          className="pl-8"
+        />
+      </div>
+      {filteredAuthSchemes.length === 0 ? (
+        <p className="py-8 text-center text-xs text-muted-foreground">
+          {t('noMatching')}
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {filteredAuthSchemes.map((authScheme) => (
+            <ListCard
+              key={authScheme.id}
+              onClick={() => selection.selectAuthScheme(authScheme.id)}
+            >
+              <div className="font-medium">{authScheme.name}</div>
+              <div className="font-mono text-[0.65rem] text-muted-foreground">
+                {authScheme.type}
+              </div>
+              <UsageRefs refs={authSchemeUsage.get(authScheme.id) ?? []} />
+            </ListCard>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

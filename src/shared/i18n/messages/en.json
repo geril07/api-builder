@@ -261,7 +261,9 @@
     "aiAgentFailed": "AI agent failed.",
     "newResource": "New resource",
     "newSchema": "New schema",
-    "newAuthScheme": "New auth scheme"
+    "newAuthScheme": "New auth scheme",
+    "search": "Search...",
+    "noMatching": "No results match your search."
   },
   "Shared": {
     "loading": "Loading...",
