@@ -29,11 +29,11 @@ export async function agent(
   const tools = createAgentTools(apiDesignId, workspaceId)
 
   const result = streamText({
-    model: openrouter('google/gemma-4-31b-it:free', {
+    model: openrouter('tencent/hy3-preview', {
       extraBody: {
         provider: {
-          only: ['google-ai-studio'],
-          order: ['google-ai-studio'],
+          only: ['siliconflow'],
+          order: ['siliconflow'],
           allow_fallbacks: false,
         },
       },
