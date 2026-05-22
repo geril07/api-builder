@@ -7,7 +7,7 @@ export const exportApiDesignProc = protectedProcedure
   .input(
     z.object({
       apiDesignId: z.string(),
-      format: z.enum(['json', 'yaml']),
+      format: z.enum(['json', 'yaml', 'postman']),
     }),
   )
   .handler(async ({ input, context }) => {

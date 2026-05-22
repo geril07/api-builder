@@ -91,12 +91,12 @@ Generated JSON follows the Postman Collection v2.1 schema:
 
 ### Auth scheme to Postman auth mapping
 
-| DB type | Postman auth.type | Details |
-|---|---|---|
-| bearer | "bearer" | bearer: [{ key: "token", value: "{{bearerToken}}", type: "string" }], plus variable |
-| apiKey | "apikey" | apikey: [{ key, value: "{{apiKey}}", type: "string" }, { key: "in", value: config.in, type: "string" }], plus variable |
-| oauth2 | "oauth2" | oauth2: [{ key: "accessToken", value: "{{accessToken}}", type: "string" }], plus variable |
-| openIdConnect | "oauth2" (fallback) | Same as oauth2 |
+| DB type       | Postman auth.type   | Details                                                                                                                |
+| ------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| bearer        | "bearer"            | bearer: [{ key: "token", value: "{{bearerToken}}", type: "string" }], plus variable                                    |
+| apiKey        | "apikey"            | apikey: [{ key, value: "{{apiKey}}", type: "string" }, { key: "in", value: config.in, type: "string" }], plus variable |
+| oauth2        | "oauth2"            | oauth2: [{ key: "accessToken", value: "{{accessToken}}", type: "string" }], plus variable                              |
+| openIdConnect | "oauth2" (fallback) | Same as oauth2                                                                                                         |
 
 Collection-level auth applies to all requests. When multiple auth schemes exist across endpoints, the first one found is used.
 

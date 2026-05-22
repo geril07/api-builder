@@ -68,6 +68,184 @@ export type ExportAuthScheme = {
   config: unknown
 }
 
+export type PostmanCollectionV21 = {
+  info: {
+    name: string
+    description: string
+    schema: string
+  }
+  item: PostmanFolderItem[]
+  auth?: PostmanAuth
+  variable: PostmanVariable[]
+}
+
+export type PostmanAuth = {
+  type: string
+  [key: string]: unknown
+}
+
+export type PostmanFolderItem = {
+  name: string
+  item: PostmanRequestItem[]
+}
+
+export type PostmanRequestItem = {
+  name: string
+  request: {
+    method: string
+    header: unknown[]
+    url: {
+      raw: string
+      host: string[]
+      path: string[]
+      query?: { key: string; value: string }[]
+    }
+    body?: { mode: string; raw?: string }
+    description: string
+  }
+  response: unknown[]
+}
+
+export type PostmanVariable = {
+  key: string
+  value: string
+  type?: string
+}
+
+const POSTMAN_SCHEMA =
+  'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
+
+function buildPostmanPath(path: string): { segments: string[]; raw: string } {
+  const normalized = path.startsWith('/') ? path.slice(1) : path
+  const segments = normalized
+    .split('/')
+    .filter(Boolean)
+    .map((s) => s.replace(/\{(\w+)\}/g, ':$1'))
+  return {
+    segments,
+    raw: `{{baseUrl}}/${segments.join('/')}`,
+  }
+}
+
+function buildPostmanAuth(
+  schemes: ExportAuthScheme[],
+): { auth: PostmanAuth; variables: PostmanVariable[] } | undefined {
+  const scheme = schemes[0]
+  if (!scheme) return undefined
+
+  switch (scheme.type) {
+    case 'bearer': {
+      return {
+        auth: {
+          type: 'bearer',
+          bearer: [{ key: 'token', value: '{{bearerToken}}', type: 'string' }],
+        },
+        variables: [{ key: 'bearerToken', value: '' }],
+      }
+    }
+    case 'apiKey': {
+      const config = (scheme.config ?? {}) as Record<string, string>
+      return {
+        auth: {
+          type: 'apikey',
+          apikey: [
+            { key: 'key', value: config.key ?? '', type: 'string' },
+            { key: 'in', value: config.in ?? '', type: 'string' },
+            { key: 'value', value: '{{apiKey}}', type: 'string' },
+          ],
+        },
+        variables: [{ key: 'apiKey', value: '' }],
+      }
+    }
+    case 'oauth2':
+    case 'openIdConnect': {
+      return {
+        auth: {
+          type: 'oauth2',
+          oauth2: [
+            { key: 'accessToken', value: '{{accessToken}}', type: 'string' },
+          ],
+        },
+        variables: [{ key: 'accessToken', value: '' }],
+      }
+    }
+    default:
+      return undefined
+  }
+}
+
+export function buildPostmanCollection(
+  design: DesignForExport,
+): PostmanCollectionV21 {
+  const schemeIds = new Set<string>()
+  for (const resource of design.resources) {
+    for (const endpoint of resource.endpoints) {
+      for (const id of endpoint.authSchemeIds) {
+        schemeIds.add(id)
+      }
+    }
+  }
+
+  const authResult = buildPostmanAuth(
+    design.authSchemes.filter((s) => schemeIds.has(s.id)),
+  )
+
+  return {
+    info: {
+      name: design.name,
+      description: '',
+      schema: POSTMAN_SCHEMA,
+    },
+    item: design.resources.map((resource) => ({
+      name: resource.name,
+      item: resource.endpoints.map((endpoint) => {
+        const { segments, raw: pathRaw } = buildPostmanPath(endpoint.path)
+
+        const rawParams: { name: string }[] = Array.isArray(
+          endpoint.queryParams,
+        )
+          ? endpoint.queryParams
+          : []
+        const query = rawParams.map((p) => ({ key: p.name, value: '' }))
+        const qs =
+          query.length > 0
+            ? '?' + query.map((q) => `${q.key}=${q.value}`).join('&')
+            : ''
+
+        const resolvedBodySchema = endpoint.requestBodySchemaId
+          ? design.schemas.find((s) => s.id === endpoint.requestBodySchemaId)
+              ?.jsonSchema
+          : undefined
+
+        const bodySrc = resolvedBodySchema ?? endpoint.requestBody
+
+        const body: PostmanRequestItem['request']['body'] | undefined = bodySrc
+          ? { mode: 'raw', raw: JSON.stringify(bodySrc, null, 2) }
+          : undefined
+
+        return {
+          name: endpoint.summary ?? `${endpoint.method} ${endpoint.path}`,
+          request: {
+            method: endpoint.method,
+            header: [],
+            url: {
+              raw: pathRaw + qs,
+              host: ['{{baseUrl}}'],
+              path: segments,
+              ...(query.length > 0 ? { query } : {}),
+            },
+            ...(body ? { body } : {}),
+            description: endpoint.summary ?? '',
+          },
+          response: [],
+        } satisfies PostmanRequestItem
+      }),
+    })),
+    ...(authResult ? { auth: authResult.auth } : {}),
+    variable: authResult?.variables ?? [],
+  }
+}
+
 export type DesignForExport = {
   name: string
   resources: ExportResource[]
@@ -224,7 +402,7 @@ export function serializeSpec(
 export async function exportApiDesign(
   apiDesignId: string,
   workspaceId: string,
-  format: 'json' | 'yaml',
+  format: 'json' | 'yaml' | 'postman',
 ): Promise<string> {
   const design = await db.query.apiDesignsTable.findFirst({
     where: (fields, { eq: e, and }) =>
@@ -253,6 +431,24 @@ export async function exportApiDesign(
 
   if (!design) {
     throw new Error('API design not found.')
+  }
+
+  if (format === 'postman') {
+    const collection = buildPostmanCollection({
+      name: design.name,
+      resources: design.resources.map((resource) => ({
+        ...resource,
+        endpoints: resource.endpoints.map(
+          ({ authSchemeLinks, ...endpoint }) => ({
+            ...endpoint,
+            authSchemeIds: authSchemeLinks.map((link) => link.authSchemeId),
+          }),
+        ),
+      })),
+      schemas: design.schemas,
+      authSchemes: design.authSchemes,
+    })
+    return JSON.stringify(collection, null, 2)
   }
 
   const spec = buildOpenApiSpec({
