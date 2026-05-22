@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # PRD: Continuous Dialog with AI Agent
 

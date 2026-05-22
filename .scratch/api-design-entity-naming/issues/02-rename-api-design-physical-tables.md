@@ -1,6 +1,6 @@
 # Rename API Design Physical Tables
 
-Status: ready-for-human
+Status: done
 Type: AFK
 
 ## What to build

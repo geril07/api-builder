@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Auto-layout v2 — dagre-native LR layout with colocation
 

@@ -1,6 +1,6 @@
 # Scope API Design Entity Naming
 
-Status: ready-for-human
+Status: done
 Type: AFK
 
 ## What to build

@@ -1,6 +1,6 @@
 # Model Endpoint Auth Schemes With Join Table
 
-Status: ready-for-human
+Status: done
 Type: AFK
 
 ## What to build

@@ -1,6 +1,6 @@
 # Use Client-Only Editor URL State
 
-Status: ready-for-agent
+Status: done
 Type: AFK
 
 ## Parent
