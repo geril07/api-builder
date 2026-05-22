@@ -6,7 +6,6 @@ import {
   Sparkles,
   Square,
   Wrench,
-  Loader2,
   AlertTriangle,
 } from 'lucide-react'
 
@@ -91,7 +90,9 @@ function ToolCallCard({
       <div className="flex items-center gap-2">
         {tool.status === 'running' ? (
           <>
-            <Spinner />
+            <div className="flex size-5 items-center justify-center">
+              <Spinner />
+            </div>
             <span className="text-xs font-semibold text-muted-foreground">
               {toolRunningLabel(tool.name, t)}
             </span>
@@ -409,8 +410,10 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
                       ))}
                     </div>
                   ) : null}
-                  <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                    <Loader2 className="size-3 animate-spin" />
+                  <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                    <div className="inline-flex size-4 items-center justify-center overflow-hidden">
+                      <Spinner className="size-3" />
+                    </div>
                     {t('toolsComplete', {
                       n: draftToolCalls.filter((tc) => tc.status !== 'running')
                         .length,
