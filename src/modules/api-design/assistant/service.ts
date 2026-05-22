@@ -29,11 +29,11 @@ export async function agent(
   const tools = createAgentTools(apiDesignId, workspaceId)
 
   const result = streamText({
-    model: openrouter('openrouter/owl-alpha', {
+    model: openrouter('nvidia/nemotron-3-super-120b-a12b:free', {
       extraBody: {
         provider: {
-          only: ['stealth/int8'],
-          order: ['stealth/int8'],
+          only: ['nvidia'],
+          order: ['nvidia'],
           allow_fallbacks: false,
         },
       },
