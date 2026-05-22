@@ -26,6 +26,7 @@ import { cn } from '@/shared/utils/cn'
 
 import { orpcClient } from '@/shared/orpc/client'
 import { apiDesignQueryOptions } from '../queries'
+import { Spinner } from '@/shared/ui/spinner'
 
 type AiDialogProps = {
   apiDesignId: string
@@ -90,7 +91,7 @@ function ToolCallCard({
       <div className="flex items-center gap-2">
         {tool.status === 'running' ? (
           <>
-            <Loader2 className="size-3 shrink-0 animate-spin" />
+            <Spinner />
             <span className="text-xs font-semibold text-muted-foreground">
               {toolRunningLabel(tool.name, t)}
             </span>
@@ -366,7 +367,7 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
         ) : (
           <div
             ref={scrollRef}
-            className="flex max-h-[50vh] flex-col overflow-auto p-3 font-mono text-sm"
+            className="flex max-h-[50vh] flex-col overflow-auto pe-3 font-mono text-sm"
           >
             <div className="mt-auto space-y-3">
               {messages.map((msg, i) => (
@@ -399,13 +400,8 @@ export function AiDialog({ apiDesignId }: AiDialogProps) {
                   {draftContent ? (
                     <p className="leading-relaxed whitespace-pre-wrap text-muted-foreground">
                       {draftContent}
-                      <span className="animate-pulse">▊</span>
                     </p>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      <span className="animate-pulse">▊</span>
-                    </p>
-                  )}
+                  ) : null}
                   {draftToolCalls.length > 0 ? (
                     <div className="space-y-2">
                       {draftToolCalls.map((tool) => (
