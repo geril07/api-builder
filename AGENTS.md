@@ -3,9 +3,7 @@
 ```text
 src/
   app/       Next.js routes, layouts, route handlers
-  features/  User-facing UI flows and screen-level composition
-  modules/   Domain/application logic, services, procedures, DTOs
-  orpc/      App RPC boundary: router, client, server client
+  modules/   domain or features logic
   shared/    Generic reusable infrastructure, UI primitives, utilities
 ```
 
