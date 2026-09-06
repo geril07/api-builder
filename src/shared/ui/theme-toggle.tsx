@@ -24,15 +24,13 @@ function ThemeToggle() {
     { value: 'system', label: t('themeSystem'), icon: Monitor },
   ] as const
 
-  const current = themes.find((t) => t.value === theme)
-  const Icon = current?.icon ?? Monitor
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={<Button variant="ghost" size="icon-sm" aria-label="Theme" />}
       >
-        <Icon />
+        <Sun className="dark:hidden" />
+        <Moon className="hidden dark:block" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuRadioGroup
