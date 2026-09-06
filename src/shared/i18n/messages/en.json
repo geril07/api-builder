@@ -1,29 +1,119 @@
 {
   "Landing": {
     "brand": "API Builder",
-    "subtitle": "Visual API design tool",
+    "metaTitle": "Design your REST API before you build it",
     "openDashboard": "Open dashboard",
     "signIn": "Sign in",
-    "heroTitle": "Design REST APIs visually. Canvas, flat editor, or both.",
-    "heroSubtitle": "Define resources, endpoints, schemas, and auth schemes. Get AI suggestions and export to OpenAPI, Postman, cURL, or TypeScript.",
+    "skip": "Skip to content",
+    "navigation": "Main navigation",
+    "navOverview": "Overview",
+    "navWorkflow": "How it works",
+    "navFaq": "FAQs",
+    "eyebrow": "A workspace for REST API design",
+    "heroLine1": "Design your API.",
+    "heroLine2": "Before you build it.",
+    "heroSubtitle": "Map your endpoints, connect your schemas, and get the structure right. A visual workspace for developers, from first idea to OpenAPI.",
     "ctaCreate": "Start designing",
-    "ctaPreview": "See how it works",
-    "featureAiTitle": "AI Agent",
-    "featureAiCopy": "Describe your API in plain English. The AI agent creates resources, endpoints, and schemas directly on the canvas.",
-    "featureModeTitle": "Canvas & Flat mode",
-    "featureModeCopy": "Switch between a spatial canvas and a tabular flat editor. Design your way.",
-    "featureExportTitle": "Multi-format Export",
-    "featureExportCopy": "Generate OpenAPI 3.0 specs, Postman collections, cURL commands, and TypeScript clients.",
-
-    "howItWorksTitle": "How it works",
-    "step1Title": "Define Resources & Endpoints",
-    "step1Copy": "Create REST resources and set up HTTP endpoints with methods, paths, and parameters.",
-    "step2Title": "Add Schemas & Auth",
-    "step2Copy": "Model request and response schemas as JSON Schema. Configure bearer tokens, API keys, or OAuth.",
-    "step3Title": "Export Anywhere",
-    "step3Copy": "Generate OpenAPI specs, Postman collections, cURL snippets, and TypeScript clients.",
-    "exportTitle": "Export to your favorite formats",
-    "exportDesc": "One design, multiple outputs."
+    "heroNote": "No credit card required. Export your design when you need it.",
+    "proof": "Built around the standards you use",
+    "benefitsLabel": "Clarity before code",
+    "benefitsTitle": "The details belong together.",
+    "benefitsCopy": "Not in scattered notes or separate files. Keep your endpoints, data shapes, and auth in one API Design.",
+    "benefits": {
+      "structure": {
+        "title": "See what connects.",
+        "copy": "Trace an endpoint to its response schema and auth requirements. Make those decisions before they become code."
+      },
+      "perspective": {
+        "title": "Big picture. Small details.",
+        "copy": "Explore connections on the canvas. Switch to Flat Mode to focus on the details. The same design, either way."
+      },
+      "assistant": {
+        "title": "Skip the blank canvas.",
+        "copy": "Describe what you want to build. Let the AI assistant create a starting point, then review and refine the design."
+      }
+    },
+    "assistantDetail": "Your idea. A starting point.",
+    "taglineLabel": "Design with intention",
+    "taglineLine1": "Think it through.",
+    "taglineLine2": "Then build it right.",
+    "taglineCopy": "Work out the shape of your API while changes are still design decisions, not code rewrites.",
+    "workflowLabel": "From idea to API Design",
+    "workflowTitle": "A clear path to your first export.",
+    "workflowCopy": "Start with a resource. Add the details. Take the result into the tools you already use.",
+    "steps": {
+      "define": {
+        "title": "Give your API a shape.",
+        "copy": "Create resources like Books or Orders. Add endpoints with methods, paths, and query parameters."
+      },
+      "connect": {
+        "title": "Make the contract explicit.",
+        "copy": "Define reusable request and response schemas. Connect auth schemes so each endpoint says what it needs."
+      },
+      "export": {
+        "title": "Take it into your workflow.",
+        "copy": "Export OpenAPI as YAML or JSON, or download a Postman collection. Your design is not tied to the editor."
+      }
+    },
+    "exportNote": "Example excerpt · OpenAPI export",
+    "faqLabel": "A few things to know",
+    "faqTitle": "Before you start.",
+    "faqCopy": "What API Builder does, what it does not, and where your design goes next.",
+    "faq": {
+      "purpose": {
+        "question": "What can I design here?",
+        "answer": "REST APIs with resources, endpoints, query parameters, reusable JSON Schemas, and auth schemes. Each API Design keeps these parts together in your workspace."
+      },
+      "code": {
+        "question": "Does this build or host my backend?",
+        "answer": "No. API Builder is a design tool. It helps you define the API contract and export it. You implement and host the backend with your own tools."
+      },
+      "modes": {
+        "question": "Do I have to use the canvas?",
+        "answer": "No. Flat Mode lets you work through tabbed lists and a detail panel. You can switch between Canvas Mode and Flat Mode without creating a separate design."
+      },
+      "ai": {
+        "question": "Do I need AI to use it?",
+        "answer": "No. You can create and edit everything yourself. The AI assistant is an optional way to turn a description into a starting design. Review its output before using it."
+      },
+      "exports": {
+        "question": "What can I export?",
+        "answer": "An OpenAPI 3.0 document in YAML or JSON, or a Postman collection. Copy the generated output or download it from the editor."
+      },
+      "account": {
+        "question": "Do I need an account?",
+        "answer": "Yes. Sign in to create and save API Designs in your personal workspace. No credit card is required. You can explore the example above without an account."
+      }
+    },
+    "finalLabel": "Start with the structure",
+    "finalTitle": "Your next API starts here.",
+    "finalCopy": "Turn the idea in your head into a design you can build from.",
+    "footerCopy": "A little more thought before a lot more code.",
+    "backToTop": "Back to top",
+    "preview": {
+      "label": "Interactive API design illustration with Canvas and Flat modes",
+      "name": "Bookshop API",
+      "example": "Example API Design",
+      "mode": "Preview editor mode",
+      "canvas": "Canvas",
+      "flat": "Flat",
+      "resource": "Resource",
+      "schema": "Schema",
+      "auth": "Auth scheme",
+      "response": "Response",
+      "connected": "Resources, schemas, and auth. Connected.",
+      "caption": "One design. Two ways to work.",
+      "tryModes": "Try the mode switch",
+      "flatHint": "Same endpoints. A different perspective.",
+      "endpoints": "Books resource endpoints",
+      "method": "Method",
+      "path": "Path",
+      "summary": "Summary",
+      "listBooks": "List books",
+      "addBook": "Add a book",
+      "getBook": "Get a book",
+      "flatNote": "Responses use the Book schema. Auth uses Bearer JWT."
+    }
   },
   "Auth": {
     "signInTitle": "Sign in to continue",
