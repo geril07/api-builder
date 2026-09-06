@@ -37,7 +37,7 @@
   color: var(--primary);
 }
 .page section[id] {
-  scroll-margin-top: 32px;
+  scroll-margin-top: 72px;
 }
 
 .skipLink {
@@ -55,7 +55,8 @@
 
 .header {
   @apply border-b border-border bg-card/85 backdrop-blur-xl;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 20;
 }
 .headerInner {
