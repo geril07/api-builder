@@ -1,11 +1,11 @@
 import Image from 'next/image'
-import { Geist_Mono } from 'next/font/google'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 
 import { Link, routing } from '@/shared/i18n/routing'
 import { LocaleSwitcher } from '@/shared/i18n/locale-switcher'
 import { ThemeToggle } from '@/shared/ui/theme-toggle'
+import { buttonVariants } from '@/shared/ui/button'
 import { getServerSession } from '@/modules/auth/server'
 import logo from '../../../logo.svg'
 
@@ -13,7 +13,6 @@ import { WelcomeMotion } from './welcome-motion'
 import { WelcomePreview } from './welcome-preview'
 import styles from './welcome.module.css'
 
-const fontMono = Geist_Mono({ subsets: ['latin'] })
 const benefits = ['structure', 'perspective', 'assistant'] as const
 const steps = ['define', 'connect', 'export'] as const
 const questions = [
@@ -71,6 +70,10 @@ async function HomePage() {
   const t = await getTranslations('Landing')
   const destination = session ? '/dashboard' : '/sign-in'
   const cta = session ? t('openDashboard') : t('ctaCreate')
+  const ctaClassName = buttonVariants({
+    size: 'lg',
+    className: styles.primaryButton,
+  })
 
   return (
     <WelcomeMotion>
@@ -78,27 +81,37 @@ async function HomePage() {
         {t('skip')}
       </a>
       <header className={styles.header}>
-        <Link
-          href="/"
-          aria-current="page"
-          aria-label={t('brand')}
-          className={styles.brand}
-        >
-          <Image src={logo} alt="" className="size-8" priority />
-          <span>{t('brand')}</span>
-        </Link>
-        <nav aria-label={t('navigation')} className={styles.navigation}>
-          <a href="#why">{t('navOverview')}</a>
-          <a href="#how-it-works">{t('navWorkflow')}</a>
-          <a href="#faq">{t('navFaq')}</a>
-        </nav>
-        <div className={styles.headerActions}>
-          <ThemeToggle />
-          <LocaleSwitcher className="font-sans text-sm" />
-          <Link href={destination} className={styles.signIn}>
-            {session ? t('openDashboard') : t('signIn')}
-            <span aria-hidden="true">↗</span>
+        <div className={styles.headerInner}>
+          <Link
+            href="/"
+            aria-current="page"
+            aria-label={t('brand')}
+            className={styles.brand}
+          >
+            <Image src={logo} alt="" className="size-8" priority />
+            <span>{t('brand')}</span>
           </Link>
+          <nav aria-label={t('navigation')} className={styles.navigation}>
+            <a href="#why">{t('navOverview')}</a>
+            <a href="#how-it-works">{t('navWorkflow')}</a>
+            <a href="#faq">{t('navFaq')}</a>
+          </nav>
+          <div className={styles.headerActions}>
+            <ThemeToggle />
+            <LocaleSwitcher />
+            <Link
+              href={destination}
+              data-slot="button"
+              className={buttonVariants({
+                variant: 'ghost',
+                size: 'sm',
+                className: styles.signIn,
+              })}
+            >
+              {session ? t('openDashboard') : t('signIn')}
+              <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -115,7 +128,11 @@ async function HomePage() {
               {t('heroLine2')}
             </h1>
             <p className={styles.heroSubtitle}>{t('heroSubtitle')}</p>
-            <Link href={destination} className={styles.primaryButton}>
+            <Link
+              href={destination}
+              data-slot="button"
+              className={ctaClassName}
+            >
               {cta}
               <span aria-hidden="true">↗</span>
             </Link>
@@ -228,7 +245,7 @@ async function HomePage() {
                 <span>books.openapi.yaml</span>
                 <span>OpenAPI 3.0</span>
               </figcaption>
-              <pre className={fontMono.className}>
+              <pre className="font-mono">
                 <code>
                   <span className={styles.codeMuted}>openapi:</span>
                   {' 3.0.3\n'}
@@ -278,7 +295,7 @@ async function HomePage() {
           <p className={styles.eyebrow}>{t('finalLabel')}</p>
           <h2 id="start-title">{t('finalTitle')}</h2>
           <p>{t('finalCopy')}</p>
-          <Link href={destination} className={styles.primaryButton}>
+          <Link href={destination} data-slot="button" className={ctaClassName}>
             {cta}
             <span aria-hidden="true">↗</span>
           </Link>
