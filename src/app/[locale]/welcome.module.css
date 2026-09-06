@@ -1,59 +1,40 @@
 @reference '../globals.css';
 
 .page {
-  --background: #f7f8f5;
-  --foreground: #20251f;
-  --card: #ffffff;
-  --border: #dce1d8;
-  --muted-foreground: #626b60;
-  --welcome-green: #287747;
-  --welcome-amber: #96621f;
-  --welcome-soft: #edf2e9;
   --welcome-ease: cubic-bezier(0.32, 0.72, 0, 1);
   min-height: 100svh;
   overflow: clip;
   background: var(--background);
   color: var(--foreground);
-  padding-top: 24px;
   font-family: var(--font-sans), sans-serif;
 }
 
-:global(.dark) .page {
-  --background: #181818;
-  --foreground: #efefea;
-  --card: #1f1f1f;
-  --border: #313131;
-  --muted-foreground: #a9ada5;
-  --welcome-green: #9dddac;
-  --welcome-amber: #e2b773;
-  --welcome-soft: #272727;
-}
-
 .page :is(h1, h2, h3) {
+  font-family: var(--font-mono), monospace;
   text-wrap: balance;
 }
 .page p {
   text-wrap: pretty;
 }
 .page code {
-  font-family: inherit;
+  font-family: var(--font-mono), monospace;
 }
-.page :is(a, button, summary) {
+.page :is(a, summary):not([data-slot='button']) {
   transition:
     color 700ms var(--welcome-ease),
     background-color 700ms var(--welcome-ease),
     transform 700ms var(--welcome-ease),
     box-shadow 700ms var(--welcome-ease);
 }
-.page :is(a, button, summary):focus-visible {
-  outline: 2px solid var(--welcome-green);
+.page :is(a, summary):not([data-slot='button']):focus-visible {
+  outline: 2px solid var(--ring);
   outline-offset: 4px;
 }
-.page :is(a, button, summary):active {
-  transform: scale(0.98);
+.page :is(a, summary):not([data-slot='button']):active {
+  transform: translateY(1px);
 }
-.page :is(a, summary):hover {
-  color: var(--welcome-green);
+.page :is(a, summary):not([data-slot='button']):hover {
+  color: var(--primary);
 }
 .page section[id] {
   scroll-margin-top: 32px;
@@ -67,31 +48,27 @@
   transform: translateY(-200%);
   background: var(--card);
   padding: 12px 16px;
-  border-radius: 8px;
 }
 .skipLink:focus {
   transform: translateY(0);
 }
 
 .header {
-  @apply text-sm;
+  @apply border-b border-border bg-card/85 backdrop-blur-xl;
   position: relative;
   z-index: 20;
+}
+.headerInner {
+  @apply text-sm;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 48px;
-  width: max-content;
-  max-width: calc(100% - 32px);
-  margin: 0 auto;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--card) 85%, transparent);
-  backdrop-filter: blur(24px);
-  box-shadow: 0 4px 24px #00000005;
+  gap: 24px;
+  min-height: 56px;
+  padding: 8px 16px;
 }
 .brand {
+  @apply font-mono text-sm;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -109,17 +86,8 @@
   align-items: center;
   gap: 4px;
 }
-.headerActions button {
-  font-family: inherit;
-  border-radius: 9999px;
-}
 .signIn {
-  display: flex;
-  align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .hero {
@@ -127,12 +95,12 @@
   text-align: center;
 }
 .eyebrow {
-  @apply text-xs;
+  @apply font-mono text-xs;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 600;
-  color: var(--welcome-green);
+  font-weight: 500;
+  color: var(--muted-foreground);
 }
 .hero .eyebrow,
 .tagline .eyebrow,
@@ -145,19 +113,12 @@
   height: 8px;
   flex-shrink: 0;
   border-radius: 9999px;
-  background: var(--welcome-green);
+  background: var(--primary);
 }
 .heroTitle {
-  @apply text-7xl font-semibold;
+  @apply text-5xl font-semibold tracking-tight;
   max-width: 680px;
   margin: 24px auto 0;
-  letter-spacing: -0.055em;
-  color: transparent;
-  background-image: linear-gradient(to right, #000000, #666666);
-  background-clip: text;
-}
-:global(.dark) .heroTitle {
-  background-image: linear-gradient(to right, #ffffff, #9b9b9b);
 }
 .heroSubtitle {
   @apply text-lg;
@@ -166,31 +127,8 @@
   color: var(--muted-foreground);
 }
 .primaryButton {
-  @apply text-base;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
+  gap: 12px;
   margin-top: 32px;
-  padding: 8px 12px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: #295e3b;
-  color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 2px 4px #00000012;
-}
-.page .primaryButton:hover {
-  background: #204b2f;
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-:global(.dark) .primaryButton {
-  background: #313131;
-  border-color: #6a936e;
-}
-:global(.dark) .page .primaryButton:hover {
-  background: #272727;
 }
 .heroNote {
   @apply text-xs;
@@ -203,13 +141,10 @@
   text-align: left;
 }
 .preview {
+  @apply shadow-lg;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 16px;
   background: var(--card);
-  box-shadow:
-    0 24px 64px #2332210d,
-    0 2px 8px #23322105;
 }
 .previewToolbar {
   display: flex;
@@ -219,40 +154,21 @@
   padding: 16px 24px;
 }
 .projectMark {
-  @apply text-sm;
+  @apply font-mono text-sm;
   display: grid;
   place-items: center;
   width: 32px;
   height: 32px;
-  background: var(--welcome-soft);
-  color: var(--welcome-green);
+  background: var(--muted);
+  color: var(--foreground);
   border: 1px solid var(--border);
-  border-radius: 8px;
   font-weight: 600;
 }
 .modeSwitch {
   display: flex;
-  gap: 4px;
-  padding: 4px;
+  padding: 2px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--background);
-}
-.modeSwitch button {
-  @apply text-xs;
-  padding: 8px 12px;
-  border-radius: 4px;
-  color: var(--muted-foreground);
-  font-weight: 600;
-}
-.modeSwitch button:hover {
-  background: var(--welcome-soft);
-  color: var(--foreground);
-}
-.modeSwitch button[aria-pressed='true'] {
   background: var(--card);
-  color: var(--foreground);
-  box-shadow: 0 2px 4px #0000000d;
 }
 .previewExport {
   @apply text-xs;
@@ -274,11 +190,10 @@
   height: 100%;
 }
 .previewCard {
+  @apply shadow-lg;
   border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--card);
-  padding: 16px;
-  box-shadow: 0 8px 24px #23322108;
+  padding: 12px;
 }
 .resource {
   position: absolute;
@@ -303,14 +218,13 @@
   color: var(--muted-foreground);
 }
 .resourceSymbol {
-  @apply text-xl;
+  @apply font-mono text-xl;
   display: grid;
   place-items: center;
   width: 32px;
   height: 32px;
-  background: var(--welcome-soft);
-  color: var(--welcome-green);
-  border-radius: 4px;
+  background: var(--muted);
+  color: var(--primary);
 }
 .endpoint {
   @apply text-xs;
@@ -319,29 +233,17 @@
   gap: 12px;
   padding: 8px;
   background: var(--background);
-  border-radius: 4px;
-}
-.get,
-.post {
-  @apply text-xs;
-  font-weight: 600;
-}
-.get {
-  color: var(--welcome-green);
-}
-.post,
-.authSymbol {
-  color: var(--welcome-amber);
 }
 .authSymbol {
   @apply text-2xl;
+  color: var(--chart-4);
 }
 .canvasLabel {
   @apply text-xs;
   position: absolute;
   top: 80px;
   left: 48%;
-  color: var(--welcome-green);
+  color: var(--primary);
 }
 .canvasHint {
   @apply text-xs;
@@ -371,7 +273,6 @@
   overflow-x: auto;
   margin-top: 24px;
   border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--card);
 }
 .flat table {
@@ -387,7 +288,7 @@
 .flat th {
   font-weight: 500;
   color: var(--muted-foreground);
-  background: var(--welcome-soft);
+  background: var(--muted);
 }
 .flat tr + tr {
   border-top: 1px solid var(--border);
@@ -414,9 +315,8 @@
 }
 .section h2,
 .finalCta h2 {
-  @apply text-4xl font-semibold;
+  @apply text-3xl font-semibold tracking-tight;
   margin-top: 16px;
-  letter-spacing: -0.04em;
 }
 .sectionIntro {
   display: flex;
@@ -443,19 +343,17 @@
   flex-direction: column;
   padding: 24px;
   border: 1px solid var(--border);
-  border-radius: 16px;
   background: var(--card);
 }
 .index {
-  @apply text-xs;
-  color: var(--welcome-green);
+  @apply font-mono text-xs;
+  color: var(--muted-foreground);
   font-weight: 600;
 }
 .benefit h3,
 .step h3 {
-  @apply text-xl font-semibold;
+  @apply text-base font-semibold tracking-tight;
   margin-top: 24px;
-  letter-spacing: -0.025em;
 }
 .benefit > p,
 .step p {
@@ -472,23 +370,22 @@
   gap: 8px;
   margin-top: auto;
   padding-top: 32px;
-  color: var(--welcome-green);
+  color: var(--muted-foreground);
+  font-family: var(--font-mono), monospace;
 }
 .benefitDetail > span:not(.statusDot) {
   padding: 8px;
-  background: var(--welcome-soft);
-  border-radius: 4px;
+  background: var(--muted);
 }
 .tagline {
   padding: 80px 24px;
-  background: var(--welcome-soft);
+  background: var(--card);
   text-align: center;
 }
 .tagline h2 {
-  @apply text-6xl font-semibold;
+  @apply text-5xl font-semibold tracking-tight;
   max-width: 680px;
   margin: 32px auto 0;
-  letter-spacing: -0.045em;
 }
 .word {
   display: inline-block;
@@ -518,15 +415,14 @@
   gap: 16px;
 }
 .stepNumber {
-  @apply text-xs;
+  @apply font-mono text-xs;
   display: grid;
   place-items: center;
   flex-shrink: 0;
   width: 40px;
   height: 40px;
   border: 1px solid var(--border);
-  border-radius: 9999px;
-  color: var(--welcome-green);
+  color: var(--muted-foreground);
 }
 .step h3 {
   margin-top: 4px;
@@ -534,11 +430,9 @@
 .exportSample {
   overflow: hidden;
   padding: 24px;
-  border: 1px solid #313131;
-  border-radius: 16px;
-  background: #1f1f1f;
-  color: #e6eae1;
-  box-shadow: 0 16px 48px #0000000d;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
 }
 .exportSample figcaption {
   @apply text-xs;
@@ -546,7 +440,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  color: #b3b9ae;
+  color: var(--muted-foreground);
 }
 .exportSample pre {
   @apply text-sm;
@@ -554,15 +448,15 @@
   margin-top: 32px;
 }
 .codeMuted {
-  color: #b3b9ae;
+  color: var(--muted-foreground);
 }
 .codeAccent {
-  color: #a8d6a2;
+  color: var(--primary);
 }
 .exportSample p {
   @apply text-xs;
   margin-top: 32px;
-  color: #b3b9ae;
+  color: var(--muted-foreground);
 }
 .faq {
   display: grid;
@@ -583,11 +477,10 @@
 }
 .questions details {
   border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--card);
 }
 .questions summary {
-  @apply text-base;
+  @apply font-mono text-sm;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -596,7 +489,6 @@
   cursor: pointer;
   list-style: none;
   font-weight: 500;
-  border-radius: 8px;
 }
 .questions summary::-webkit-details-marker {
   display: none;
@@ -619,8 +511,7 @@
   margin: 0 auto 64px;
   padding: 64px 24px;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--welcome-soft);
+  background: var(--card);
   text-align: center;
 }
 .finalCta > p:not(.eyebrow, .heroNote) {
@@ -667,14 +558,11 @@
 }
 
 @media (max-width: 900px) {
-  .header {
-    gap: 24px;
+  .heroTitle {
+    @apply text-5xl;
   }
   .navigation {
     gap: 16px;
-  }
-  .heroTitle {
-    @apply text-6xl;
   }
   .benefits {
     gap: 16px;
@@ -704,13 +592,8 @@
 }
 
 @media (max-width: 640px) {
-  .page {
-    padding-top: 16px;
-  }
-  .header {
-    width: calc(100% - 32px);
+  .headerInner {
     gap: 8px;
-    padding: 8px 12px;
   }
   .brand {
     @apply text-sm;
@@ -722,9 +605,6 @@
   .navigation {
     display: none;
   }
-  .signIn {
-    padding: 8px;
-  }
   .signIn > span {
     display: none;
   }
@@ -732,8 +612,7 @@
     padding: 48px 16px 0;
   }
   .heroTitle {
-    @apply text-4xl;
-    letter-spacing: -0.055em;
+    @apply text-3xl;
   }
   .heroSubtitle {
     @apply text-base;
@@ -748,9 +627,6 @@
   }
   .previewExport {
     display: none;
-  }
-  .modeSwitch button {
-    padding: 8px;
   }
   .canvas {
     display: grid;
@@ -807,7 +683,7 @@
   }
   .section h2,
   .finalCta h2 {
-    @apply text-3xl;
+    @apply text-2xl;
   }
   .benefits {
     grid-template-columns: 1fr;
@@ -828,7 +704,7 @@
     padding: 64px 16px;
   }
   .tagline h2 {
-    @apply text-4xl;
+    @apply text-3xl;
   }
   .workflow,
   .faq {
@@ -862,6 +738,10 @@
 @media (max-width: 380px) {
   .header .brand > span {
     display: none;
+  }
+  .heroTitle,
+  .tagline h2 {
+    @apply text-2xl;
   }
 }
 

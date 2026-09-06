@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
+import { Button } from '@/shared/ui/button'
+import { MethodBadge } from '@/modules/api-design/endpoints'
+
 import styles from './welcome.module.css'
 
 const endpoints = [
@@ -35,15 +38,17 @@ export function WelcomePreview() {
         </div>
         <div className={styles.modeSwitch} role="group" aria-label={t('mode')}>
           {(['canvas', 'flat'] as const).map((value) => (
-            <button
+            <Button
               key={value}
               type="button"
+              variant={mode === value ? 'secondary' : 'ghost'}
+              size="sm"
               aria-pressed={mode === value}
               aria-controls="design-preview"
               onClick={() => setMode(value)}
             >
               {t(value)}
-            </button>
+            </Button>
           ))}
         </div>
         <span className={styles.previewExport}>
@@ -63,20 +68,20 @@ export function WelcomePreview() {
             >
               <path
                 d="M 460 156 C 565 156 525 105 630 105"
-                stroke="var(--welcome-green)"
+                stroke="var(--chart-1)"
                 strokeWidth="2"
                 strokeDasharray="6 5"
               />
               <path
                 d="M 460 212 C 565 212 525 270 630 270"
-                stroke="var(--welcome-amber)"
+                stroke="var(--chart-4)"
                 strokeWidth="2"
                 strokeDasharray="2 5"
               />
-              <circle cx="460" cy="156" r="4" fill="var(--welcome-green)" />
-              <circle cx="630" cy="105" r="4" fill="var(--welcome-green)" />
-              <circle cx="460" cy="212" r="4" fill="var(--welcome-amber)" />
-              <circle cx="630" cy="270" r="4" fill="var(--welcome-amber)" />
+              <circle cx="460" cy="156" r="4" fill="var(--chart-1)" />
+              <circle cx="630" cy="105" r="4" fill="var(--chart-1)" />
+              <circle cx="460" cy="212" r="4" fill="var(--chart-4)" />
+              <circle cx="630" cy="270" r="4" fill="var(--chart-4)" />
             </svg>
             <article className={`${styles.resource} ${styles.previewCard}`}>
               <div className="flex items-start justify-between gap-3">
@@ -91,13 +96,7 @@ export function WelcomePreview() {
               <div className="mt-4 grid gap-2">
                 {endpoints.map((endpoint) => (
                   <div key={endpoint.summary} className={styles.endpoint}>
-                    <span
-                      className={
-                        endpoint.method === 'POST' ? styles.post : styles.get
-                      }
-                    >
-                      {endpoint.method}
-                    </span>
+                    <MethodBadge method={endpoint.method} />
                     <code>{endpoint.path}</code>
                     <span
                       className="ml-auto text-muted-foreground"
@@ -156,15 +155,7 @@ export function WelcomePreview() {
                   {endpoints.map((endpoint) => (
                     <tr key={endpoint.summary}>
                       <td>
-                        <span
-                          className={
-                            endpoint.method === 'POST'
-                              ? styles.post
-                              : styles.get
-                          }
-                        >
-                          {endpoint.method}
-                        </span>
+                        <MethodBadge method={endpoint.method} />
                       </td>
                       <td>
                         <code>{endpoint.path}</code>
